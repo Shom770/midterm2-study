@@ -1,5 +1,6 @@
 {
   "id": "24fa",
+  "kind": "past",
   "title": "Fall 2024 Midterm II",
   "date": "2024-11-15",
   "instructors": "Pierce & Sheth",
@@ -18,7 +19,7 @@
           "prompt": "Decide whether this function is tail recursive.",
           "code": "let rec mystery (l : int list) (count : int) : int =\n  begin match l with\n  | [] -> count\n  | hd :: tl -> mystery tl (count + 1)\n  end",
           "key": "Tail recursive.",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "1.2",
@@ -27,7 +28,7 @@
           "prompt": "Decide whether this function is tail recursive.",
           "code": "let rec mystery (l : bool list) : bool =\n  begin match l with\n  | [] -> false\n  | hd :: tl -> not (mystery tl)\n  end",
           "key": "Not tail recursive.",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "1.3",
@@ -36,7 +37,7 @@
           "prompt": "Decide whether this function is tail recursive.",
           "code": "let rec mystery (l : bool list) : bool =\n  begin match l with\n  | [] -> true\n  | hd :: tl -> hd && mystery tl\n  end",
           "key": "Tail recursive (the recursive call is the right operand of &&, which is in tail position).",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "1.4",
@@ -45,7 +46,7 @@
           "prompt": "Decide whether this function is tail recursive.",
           "code": "let rec mystery (l : 'a list) (f : 'a -> 'a) : 'a =\n  begin match l with\n  | [] -> failwith \"error\"\n  | hd :: [] -> f hd\n  | hd :: tl -> f (mystery tl f)\n  end",
           "key": "Not tail recursive.",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "1.5",
@@ -53,9 +54,9 @@
           "shape": "tail-rec",
           "prompt": "This mystery sums f x + f (x-1) + ... + f 1 but is not tail recursive. Write a tail-recursive mystery with the same header that behaves the same on all inputs (it may loop where the original would overflow the stack).",
           "code": "let rec mystery (f : int -> int) (x : int) : int =\n  if x = 0 then 0\n  else (f x) + (mystery f (x - 1))\n\n(* your answer must start with: *)\nlet rec mystery (f : int -> int) (x : int) : int =\n  ____",
-          "key": "let rec mystery (f : int -> int) (x : int) : int =\n  let rec loop (x : int) (acc : int) : int =\n    if x = 0 then acc else loop (x - 1) (acc + f x)\n  in loop x 0",
-          "keyStatus": "from-guide",
-          "notes": "The exam fixes the header (name mystery, same arguments); a local helper is allowed. The key adds f x, f (x-1), ... in the opposite grouping from the original, which gives the same result because integer addition (with wraparound) is associative and commutative. It also calls f in a different order than OCaml's usual right-to-left evaluation of the original, which only matters if f has side effects. For negative x both versions never reach 0, which the prompt allows. The outer 'rec' is unused (warning only), but the exam supplies that line."
+          "key": "let rec mystery (f : int -> int) (x : int) : int =\n  let rec loop (y : int) (acc : int) : int =\n    if y = 0 then acc\n    else loop (y - 1) ((f y) + acc)\n  in loop x 0",
+          "keyStatus": "official",
+          "notes": "The official solution writes loop (x - 1), which never reaches 0 for x > 1; it must be loop (y - 1). The key above has the fix. The outer rec is unused; the exam supplies that line."
         }
       ]
     },
@@ -70,9 +71,9 @@
           "shape": "invariant-check",
           "prompt": "d is a valid deque [1;2;3]; a candidate split_deque d 2 produced the pictured heap. Check every invariant broken in d1 or d2, or Valid. Picture: d and d1 both point to one deque record with head and tail = node 1; node 1 has prev None and next still pointing to node 2. d2's head points to node 2 and its tail to node 3; node 2 has prev None and next None; node 3 has next None and prev pointing back to node 2.",
           "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\nDeque invariant:\n(1) head and tail are both None or both Some, and\n(2) if head = Some h and tail = Some t, then\n  (2a) t is reachable from h by following next pointers\n  (2b) t.next = None\n  (2c) h is reachable from t by following prev pointers\n  (2d) h.prev = None\n  and, for every node n in the deque,\n  (2e) if n.next = Some m, then m.prev = Some n\n  (2f) if n.prev = Some m, then m.next = Some n\n\nChoices: (1) (2a) (2b) (2c) (2d) (2e) (2f) Valid",
-          "key": "",
-          "keyStatus": "none",
-          "notes": "The picture description comes from reading the exam figure's arrows and should be checked against the PDF."
+          "key": "(2a), (2b), (2e), (2f)",
+          "keyStatus": "official",
+          "notes": "(2a): d2's head (node 2) has next = None, so its tail (node 3) is unreachable. (2b): d1's tail (node 1) still has next = Some node 2. (2e): node1.next = Some node 2 but node2.prev = None. (2f): node3.prev = Some node 2 but node2.next = None."
         },
         {
           "id": "2.2",
@@ -80,9 +81,9 @@
           "shape": "invariant-check",
           "prompt": "Same setup (valid [1;2;3], split_deque d 2), with a different resulting picture. Check every invariant broken in d1 or d2, or Valid. Picture: d and d1 point to one deque record with head = node 1 and tail = None; node 1 has prev None and next None. d2's head points to node 2 and its tail to node 3; node 2 has prev None and next pointing to node 3; node 3 has prev None and next None.",
           "code": "Choices: (1) (2a) (2b) (2c) (2d) (2e) (2f) Valid",
-          "key": "",
-          "keyStatus": "none",
-          "notes": "The picture description comes from reading the exam figure and should be checked against the PDF."
+          "key": "(1), (2c), (2e)",
+          "keyStatus": "official",
+          "notes": "(1): d1 has head = Some node 1 but tail = None. (2c): node3.prev = None, so d2's head (node 2) is unreachable from its tail by prev. (2e): node2.next = Some node 3 but node3.prev = None."
         },
         {
           "id": "2.3",
@@ -91,8 +92,8 @@
           "prompt": "Fill in split_deque d x so that it splits d at the first occurrence of x and puts x at the head of the second deque, without allocating any new dqnodes. If x is absent, d1 is d and d2 is empty. If d is empty, return two empty deques.",
           "code": "let split_deque (d : 'a deque) (x : 'a) : 'a deque * 'a deque =\n  let rec loop (dno : 'a dqnode option) : 'a deque * 'a deque =\n    begin match dno with\n    | None -> (* which two cases lead here? *)\n      ____\n    | Some n ->\n      if n.v = x then\n        (* n becomes head of second deque *)\n        begin match n.prev with\n        | None -> (* which edge case? *)\n          ____\n        | Some p ->\n          let d2 = {head = ____; tail = ____} in\n          ____\n          ____\n          ____\n          ____ (* return value *)\n        end\n      else\n        ____\n    end\n  in loop d.head",
           "key": "let split_deque (d : 'a deque) (x : 'a) : 'a deque * 'a deque =\n  let rec loop (dno : 'a dqnode option) : 'a deque * 'a deque =\n    begin match dno with\n    | None -> (d, create ())\n    | Some n ->\n      if n.v = x then\n        begin match n.prev with\n        | None -> (create (), d)\n        | Some p ->\n          let d2 = {head = dno; tail = d.tail} in\n          d.tail <- n.prev;\n          p.next <- None;\n          n.prev <- None;\n          (d, d2)\n        end\n      else loop n.next\n    end\n  in loop d.head",
-          "keyStatus": "from-guide",
-          "notes": "Matches the skeleton: three update lines plus a return value. None covers both an empty d and x not found, and (d, create ()) handles both. n.prev = None means x is at the head, so the answer is (empty, d). create () is the Homework 4 empty-deque constructor."
+          "keyStatus": "official",
+          "notes": "The None arm covers both an empty d and x not found. n.prev = None means x is at the head, so the answer is (create (), d)."
         }
       ]
     },
@@ -108,8 +109,8 @@
           "prompt": "After let a = {y = None}, let b = {y = Some a}, let c = b, say whether each expression is true or false (== is reference equality, = is structural equality). Picture: a points to record A (y = None); b and c both point to record B, whose y points to a Some cell holding A.",
           "code": "type t = {mutable y : t option}\nlet a : t = {y = None}\nlet b : t = {y = Some a}\nlet c : t = b\n\n1. a == b\n2. a = b\n3. b == c\n4. b = c\n5. c.y == Some a\n6. c.y = Some a\n7. (begin match c.y with\n    | None -> None\n    | Some d -> d.y\n    end) = None",
           "key": "1. a == b: False\n2. a = b: False\n3. b == c: True\n4. b = c: True\n5. c.y == Some a: False\n6. c.y = Some a: True\n7. (match c.y ... Some d -> d.y) = None: True",
-          "keyStatus": "derived",
-          "notes": "Item 5 is false because 'Some a' allocates a new Some cell. Item 7 evaluates to a.y = None, so it is true."
+          "keyStatus": "official",
+          "notes": "c.y == Some a is false because Some a allocates a new Some cell. The last expression evaluates to a.y = None, so it is true."
         },
         {
           "id": "3.2",
@@ -117,9 +118,8 @@
           "shape": "code-to-heap",
           "prompt": "Starting from an empty stack and heap, run the code and draw the resulting ASM stack and heap.",
           "code": "type t = {mutable y : t option}\nlet a : t = {y = None}\nlet b : t = {y = Some a}\nlet c : t = {y = Some b}\nlet d : t = {y = Some c}\n;; a.y <- Some d",
-          "key": "Stack: a, b, c, d, each pointing to its own record. a.y now points at a fresh Some cell → d; the heap is a cycle a → d → c → b → a (each record's Some cell points to the previous record).",
-          "keyStatus": "derived",
-          "notes": "Concretely: B.y → Some → A, C.y → Some → B, D.y → Some → C, and A.y → (new) Some → D. The phrase 'points to the previous record' fits b, c and d. For a it means the previous record around the cycle (d), not a record defined earlier."
+          "key": "Stack: a, b, c, d, each pointing to its own record. b.y -> Some -> a's record, c.y -> Some -> b's, d.y -> Some -> c's, and a.y -> (new) Some -> d's record. The four records form a cycle.",
+          "keyStatus": "official"
         },
         {
           "id": "3.3",
@@ -127,9 +127,9 @@
           "shape": "code-to-heap",
           "prompt": "Starting from an empty stack and heap, run the code and draw the resulting ASM stack and heap.",
           "code": "type t = {mutable y : t option}\nlet a : t = {y = Some {y = None}}\n;; begin match a.y with\n   | None -> ()\n   | Some b -> b.y <- a.y\n   end\nlet b : t option = a.y",
-          "key": "the inner record X has X.y <- a.y, the same Some cell S that a holds; S → X, so X.y → S → X, a two-node cycle. Stack: a → A; b → S (the same Some cell as a.y).",
-          "keyStatus": "derived",
-          "notes": "The b bound inside the match is temporary and is not on the final stack. The top-level b has type t option, so it points to the Some cell S, not to a record."
+          "key": "Stack: a -> record A; b -> the Some cell S that A.y holds. S points to the inner record X, and X.y now holds that same Some cell S, so X.y -> S -> X (a cycle).",
+          "keyStatus": "official",
+          "notes": "The b bound inside the match is temporary and is not on the final stack. The top-level b has type t option, so it points at the Some cell, not at a record."
         }
       ]
     },
@@ -144,9 +144,9 @@
           "shape": "gui-build",
           "prompt": "Fill in the blanks of make_game, a 1D ball game. It shows a 100x20 canvas with a 5x5 ball at (pos, 10), followed by Left and Right buttons. Clicking Left moves the ball 1 pixel left, but never below 5. The exam omits the Right button code (line 10).",
           "code": "1  let make_game (init_pos : int) : widget =\n     (* allocate internal state for the ball's position *)\n2    let pos = ____ in\n3    let circle_drawing (g : Gctx.gctx) : unit =\n       (* draw a 5x5 ellipse at the current position *)\n4      Gctx.draw_ellipse ____ (____, 10) 5 5 in\n5    let board, canvas_nc = canvas (100,20) circle_drawing in\n     (* button with text \"Left\"; first component named left_w *)\n6    let (____, ____, ____) = ____ in\n7    let left () =\n       (* move 1 pixel left *)\n8      ____ <- max (____ - 1) 5 in\n     (* listener for clicks on the left button *)\n9    ____.add_event_listener (mouseclick_listener ____);\n10   <...right button function and listener omitted...>\n11   let full_game = hlist [board; border left_w; border right_w] in\n12   border full_game",
-          "key": "let make_game (init_pos : int) : widget =\n  let pos = {contents = init_pos} in\n  let circle_drawing (g : Gctx.gctx) : unit =\n    Gctx.draw_ellipse g (pos.contents, 10) 5 5 in\n  let board, canvas_nc = canvas (100, 20) circle_drawing in\n  let (left_w, left_lc, left_nc) = button \"Left\" in\n  let left () = pos.contents <- max (pos.contents - 1) 5 in\n  left_nc.add_event_listener (mouseclick_listener left);\n  (* line 10: Right button and listener, omitted by the exam *)\n  let full_game = hlist [board; border left_w; border right_w] in\n  border full_game",
-          "keyStatus": "from-guide",
-          "notes": "Every graded blank (lines 2, 4, 6, 8, 9) comes from the guide. The guide's '...' tail was replaced with lines 11–12, copied from the exam (page 11), not made up. Line 10 is omitted in the exam itself and has no blanks, so the Right-button code is left out and its bound is not specified. 'ref init_pos' and '!pos' are equivalent to the record-field forms."
+          "key": "let make_game (init_pos : int) : widget =\n  let pos = {contents = init_pos} in\n  let circle_drawing (g : Gctx.gctx) : unit =\n    Gctx.draw_ellipse g (pos.contents, 10) 5 5 in\n  let board, canvas_nc = canvas (100, 20) circle_drawing in\n  let left_w, left_lc, left_nc = button \"Left\" in\n  let left () =\n    pos.contents <- max (pos.contents - 1) 5 in\n  left_nc.add_event_listener (mouseclick_listener left);\n  (* line 10, not graded: *)\n  let right_w, right_lc, right_nc = button \"Right\" in\n  let right () =\n    pos.contents <- min (pos.contents + 1) 95 in\n  right_nc.add_event_listener (mouseclick_listener right);\n  let full_game = hlist [board; border left_w; border right_w] in\n  border full_game",
+          "keyStatus": "official",
+          "notes": "Graded blanks are lines 2, 4, 6, 8 and 9. The official solution also fills in the omitted line 10 (the Right button). ref init_pos and !pos are equivalent to the record-field forms."
         },
         {
           "id": "4.2",
@@ -155,8 +155,8 @@
           "prompt": "make_game ends with line 11, let full_game = hlist [board; border left_w; border right_w] in, and line 12, border full_game. For each of three edits, decide whether the code still compiles, keeps the same appearance, and keeps the same functionality. (3 points each)",
           "code": "11  let full_game = hlist [board; border left_w; border right_w] in\n12  border full_game\n\n(a) Replace line 12 with: border board\n(b) Move lines 3–5 (circle_drawing and the canvas) below line 10\n(c) Replace line 11 with:\n    let full_game = hpair (border left_w) (hpair (border right_w) board) in",
           "key": "(a) Replace line 12 with border board: compiles Yes; appearance No; function No.\n(b) Move lines 3–5 below line 10: compiles Yes; appearance Yes; function Yes.\n(c) Replace line 11 with hpair (border left_w) (hpair (border right_w) board): compiles Yes; appearance No; function Yes.",
-          "keyStatus": "from-guide",
-          "notes": "Checked against the code. (a) The buttons are no longer displayed, so the ball can't be moved; full_game is unused, which is only a warning. (b) Lines 6–10 use only pos, which is defined on line 2, and not board or circle_drawing, so the move is safe. (c) The buttons now come before the board, so the layout changes but the listeners still work."
+          "keyStatus": "official",
+          "notes": "(a) The buttons are no longer shown, so the ball can't move. (b) Lines 6–10 only use pos, defined on line 2. (c) The buttons now come before the board: the layout changes, but the listeners still work."
         }
       ]
     },
@@ -172,8 +172,8 @@
           "prompt": "Implement isSubArray(small, big, row, col), which checks whether the m x m array small appears in big with its top-left corner at (row, col). Then use it in numberOfAppearances, which counts the (possibly overlapping) occurrences of small in the n x n array big, where 0 < m <= n. Example: small = [[1,1],[2,2]] and big = [[1,1,9,9],[2,2,9,9],[9,1,1,1],[9,2,2,2]] gives 3.",
           "code": "private static boolean isSubArray(int[][] small, int[][] big,\n                                  int row, int col) {\n    int m = small.length;\n    ____\n}\n\npublic static int numberOfAppearances(int[][] small, int[][] big) {\n    int m = small.length;\n    int n = big.length;\n    int count = 0;\n    ____\n}",
           "key": "private static boolean isSubArray(int[][] small, int[][] big, int row, int col) {\n    int m = small.length;\n    for (int i = 0; i < m; i++) {\n        for (int j = 0; j < m; j++) {\n            if (small[i][j] != big[row + i][col + j]) {\n                return false;\n            }\n        }\n    }\n    return true;\n}\npublic static int numberOfAppearances(int[][] small, int[][] big) {\n    int m = small.length;\n    int n = big.length;\n    int count = 0;\n    for (int i = 0; i <= n - m; i++) {\n        for (int j = 0; j <= n - m; j++) {\n            if (isSubArray(small, big, i, j)) count++;\n        }\n    }\n    return count;\n}",
-          "keyStatus": "from-guide",
-          "notes": "isSubArray assumes the caller keeps row + m <= n and col + m <= n, which the loop bounds in numberOfAppearances guarantee. On the example the key returns 3, at (0,0), (2,1) and (2,2)."
+          "keyStatus": "official",
+          "notes": "isSubArray relies on the caller keeping row + m <= n and col + m <= n, which the loop bounds guarantee."
         }
       ]
     }

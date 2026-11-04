@@ -1,0 +1,276 @@
+{
+  "id": "mock3",
+  "kind": "mock",
+  "title": "Mock exam 3",
+  "blurb": "Drills the spots past papers keep reusing: invariants on pictures, captured bindings, and GUI \"what does this edit break\" questions.",
+  "points": 120,
+  "minutes": 60,
+  "sections": [
+    {
+      "id": "1",
+      "title": "Concepts and Tail Recursion",
+      "points": 20,
+      "items": [
+        {
+          "id": "1.1",
+          "points": 8,
+          "shape": "concept-tf",
+          "prompt": "True or false? (a) In Java, a variable of type int[] can hold null. (b) In OCaml, a variable of type int option can hold null. (c) In the OCaml ASM, a tail-recursive function processing a million-element list uses a constant number of stack slots. (d) In Java, == on two int values compares their numeric values.",
+          "key": "(a) True; (b) False; (c) True; (d) True",
+          "keyStatus": "mock",
+          "notes": "(b): OCaml has no null; None is an ordinary value of the option type. (d): == compares references only for objects; for primitives it compares values."
+        },
+        {
+          "id": "1.2",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec find (p : 'a -> bool) (l : 'a list) : 'a option =\n  begin match l with\n  | [] -> None\n  | x :: tl -> if p x then Some x else find p tl\n  end",
+          "key": "Tail recursive",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "1.3",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec all_pos (l : int list) : bool =\n  begin match l with\n  | [] -> true\n  | x :: tl -> all_pos tl && x > 0\n  end",
+          "key": "Not tail recursive",
+          "keyStatus": "mock",
+          "notes": "Compare 25sp 1.5: the recursive call is the left operand of &&, so x > 0 must still be checked after it returns. Swapping the operands would make it tail recursive."
+        },
+        {
+          "id": "1.4",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec count (q : 'a qnode option) (n : int) : int =\n  begin match q with\n  | None -> n\n  | Some qn ->\n    begin match qn.next with\n    | None -> n + 1\n    | Some _ -> count qn.next (n + 1)\n    end\n  end",
+          "key": "Tail recursive",
+          "keyStatus": "mock",
+          "notes": "n + 1 in the inner None arm is not a recursive call, so it does not matter. The only recursive call is the whole Some _ arm."
+        },
+        {
+          "id": "1.5",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec sum_to (n : int) (acc : int) : int =\n  if n = 0 then acc\n  else (sum_to (n - 1) (acc + n)) + 0",
+          "key": "Not tail recursive",
+          "keyStatus": "mock",
+          "notes": "Having an accumulator is not enough. The + 0 is still work done after the call returns. Checked: it overflows a small stack on n = 1,000,000."
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Queues and Invariants",
+      "points": 34,
+      "items": [
+        {
+          "id": "2.1",
+          "points": 8,
+          "shape": "invariant-check",
+          "prompt": "For each queue picture, name the broken invariant ((1), (2a) or (2b)), or say Valid. (i) q.head = Some n1, q.tail = None, n1.next = None. (ii) q.head = Some n1, q.tail = Some n2, n1.next = None, n2.next = None. (iii) q.head = Some n1, q.tail = Some n1, n1.next = Some n2, n2.next = None. (iv) q.head = None, q.tail = None, and some node m with m.next = Some m exists elsewhere in the heap. Queue invariant: (1) head and tail are both None or both Some; (2) if head = Some h and tail = Some t, then (2a) t is reachable from h by following next pointers and (2b) t.next = None.",
+          "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option;\n                  mutable tail : 'a qnode option }",
+          "key": "(i) (1); (ii) (2a); (iii) (2b); (iv) Valid",
+          "keyStatus": "mock",
+          "notes": "(iii): t = h, so (2a) holds trivially, but the tail's next is not None. (iv): the invariant only talks about nodes reachable from q; garbage elsewhere in the heap doesn't matter."
+        },
+        {
+          "id": "2.2",
+          "points": 6,
+          "shape": "invariant-check",
+          "prompt": "This deq is buggy. Give a valid input queue on which it breaks an invariant, say which invariant, and describe the queue afterwards.",
+          "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option;\n                  mutable tail : 'a qnode option }\n\n   let deq (q : 'a queue) : 'a =\n     begin match q.head with\n     | None -> failwith \"empty\"\n     | Some n ->\n       q.head <- n.next;\n       n.v\n     end",
+          "key": "Any one-element queue, such as [7]. After deq, q.head = None but q.tail = Some n (the removed node), which breaks (1). Queues with two or more elements stay valid.",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "2.3",
+          "points": 4,
+          "shape": "invariant-check",
+          "prompt": "Fix the deq from 2.2 by adding one line.",
+          "key": "After q.head <- n.next; add\n  if n.next = None then q.tail <- None;",
+          "keyStatus": "mock",
+          "notes": "Matching on n.next (| None -> q.tail <- None | Some _ -> ()) is also fine."
+        },
+        {
+          "id": "2.4",
+          "points": 16,
+          "shape": "queue-program",
+          "prompt": "Write insert_after q x y: insert a new node with value y right after the first node whose value is x. If no node has value x, do nothing. The queue must stay valid; in particular, if x is in the last node, the new node becomes the tail. Must be tail recursive. Examples: [1; 2; 3] with x = 2, y = 9 gives [1; 2; 9; 3]; with x = 3 it gives [1; 2; 3; 9]; [1; 1] with x = 1 gives [1; 9; 1].",
+          "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option;\n                  mutable tail : 'a qnode option }\n\n   let insert_after (q : 'a queue) (x : 'a) (y : 'a) : unit =\n     ____",
+          "key": "let insert_after (q : 'a queue) (x : 'a) (y : 'a) : unit =\n  let rec loop (no : 'a qnode option) : unit =\n    begin match no with\n    | None -> ()\n    | Some n ->\n      if n.v = x then begin\n        let fresh = { v = y; next = n.next } in\n        n.next <- Some fresh;\n        if fresh.next = None then q.tail <- Some fresh\n      end else loop n.next\n    end\n  in loop q.head",
+          "keyStatus": "mock",
+          "notes": "Rubric idea: 4 pts traversal with stop at the first match, 4 pts build the node with next = n.next, 3 pts relink n.next, 3 pts update the tail when inserting at the end, 2 pts tail recursion. Writing n.next <- Some {v = y; next = None} loses the rest of the queue."
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Closures, ASM, and Equality",
+      "points": 18,
+      "items": [
+        {
+          "id": "3.1",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "What is the value of r?",
+          "code": "let x = 10\nlet f (y : int) : int = x + y\nlet x = 100\nlet g = fun (z : int) -> f z + x\nlet r = g 1",
+          "key": "111  (f saved x = 10 when it was defined, so f 1 = 11; g reads the newer x = 100)",
+          "keyStatus": "mock",
+          "notes": "The second let x makes a new binding; it does not change the old one. Closures keep the binding that was in scope when they were created."
+        },
+        {
+          "id": "3.2",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.1. Which bindings are saved in f's closure? Choose all that apply: the first x (= 10), the second x (= 100), y, f, g.",
+          "key": "Only the first x (= 10)",
+          "keyStatus": "mock",
+          "notes": "y is f's parameter. The second x doesn't exist yet when f is defined."
+        },
+        {
+          "id": "3.3",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "What is the value of n?",
+          "code": "let make_log () : (string -> unit) * (unit -> int) =\n  let entries = { contents = [] } in\n  let add (s : string) : unit = entries.contents <- s :: entries.contents in\n  let size () : int = List.length entries.contents in\n  (add, size)\n\nlet (add_a, size_a) = make_log ()\nlet (add_b, size_b) = make_log ()\nlet add_c = add_a\n;; add_a \"x\"; add_b \"y\"; add_c \"z\"\nlet n = size_a () * 10 + size_b ()",
+          "key": "21  (add_c is add_a, so log a holds [\"z\"; \"x\"] and size_a () = 2; size_b () = 1)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.4",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.3. Which bindings must be saved in the closure for add? Choose all that apply: entries, s, add, size, make_log.",
+          "key": "entries only",
+          "keyStatus": "mock",
+          "notes": "s is add's own parameter. size is defined after add and is not used by it."
+        },
+        {
+          "id": "3.5",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "After the code below runs, is p == q true or false?",
+          "code": "let p = { contents = 5 }\nlet q = p\nlet r = { contents = 5 }\n;; q.contents <- 6",
+          "key": "True (q is another name for the same record)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.6",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.5. Is p = r true or false?",
+          "key": "False (p.contents is 6 after the update through q; r.contents is 5)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.7",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.5. Is p.contents = q.contents && not (p == r) true or false?",
+          "key": "True",
+          "keyStatus": "mock"
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "GUI Programming in OCaml",
+      "points": 28,
+      "items": [
+        {
+          "id": "4.1",
+          "points": 10,
+          "shape": "gui-build",
+          "prompt": "Fill in the blanks in like_widget: a \"Like\" button next to a label that starts at \"0 likes\" and shows the running count (\"1 likes\", \"2 likes\", ...) after each click. Keep the count in a local mutable record.",
+          "code": "1 let like_widget () : widget =\n2   let count = ____ in\n3   let count_w, count_lc = label \"0 likes\" in\n4   let btn_w, _, btn_nc = button \"Like\" in\n5   let like () : unit =\n6     ____;\n7     ____ in\n8   ____ (mouseclick_listener ____);\n9   hpair (border btn_w) count_w",
+          "key": "1 let like_widget () : widget =\n2   let count = { contents = 0 } in\n3   let count_w, count_lc = label \"0 likes\" in\n4   let btn_w, _, btn_nc = button \"Like\" in\n5   let like () : unit =\n6     count.contents <- count.contents + 1;\n7     count_lc.set_label (string_of_int count.contents ^ \" likes\") in\n8   btn_nc.add_event_listener (mouseclick_listener like);\n9   hpair (border btn_w) count_w",
+          "keyStatus": "mock",
+          "notes": "Questions 4.2 to 4.7 refer to this completed code by line number."
+        },
+        {
+          "id": "4.2",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: replace line 9 with hpair count_w (border btn_w). For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: Yes. Appearance: No. Function: Yes.",
+          "keyStatus": "mock",
+          "notes": "The label and button swap places; the behavior is unchanged."
+        },
+        {
+          "id": "4.3",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: replace line 9 with border btn_w. For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: Yes. Appearance: No. Function: No.",
+          "keyStatus": "mock",
+          "notes": "The count still goes up, but its label is no longer on screen, so the shown number never changes. count_w becomes unused, which is only a warning."
+        },
+        {
+          "id": "4.4",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: replace line 3 with let count_w, count_lc = label \"\" in. For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: Yes. Appearance: No. Function: Yes.",
+          "keyStatus": "mock",
+          "notes": "Before the first click the label is blank instead of \"0 likes\"; after it, everything matches."
+        },
+        {
+          "id": "4.5",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: delete line 2 and instead start like's body with let count = { contents = 0 } in. For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: Yes. Appearance: Yes. Function: No.",
+          "keyStatus": "mock",
+          "notes": "A new counter is made on every click, so the label shows \"1 likes\" forever. Checked in a simulation of the library."
+        },
+        {
+          "id": "4.6",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: replace mouseclick_listener like on line 8 with mouseclick_listener (like ()). For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: No. Appearance: No. Function: No.",
+          "keyStatus": "mock",
+          "notes": "like () has type unit, but mouseclick_listener expects unit -> unit. Checked with ocamlc."
+        },
+        {
+          "id": "4.7",
+          "points": 3,
+          "shape": "gui-edit",
+          "prompt": "Edit to the completed like_widget: duplicate line 8, so the same listener is added twice. For each, does it (1) still compile, (2) keep the same appearance, and (3) keep the same function (each click on Like raises the number shown by exactly one)? If it does not compile, answer No to all three.",
+          "key": "Compiles: Yes. Appearance: Yes. Function: No.",
+          "keyStatus": "mock",
+          "notes": "Both listeners run on each click, so the count goes up by 2."
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Java Arrays",
+      "points": 20,
+      "items": [
+        {
+          "id": "5.1",
+          "points": 8,
+          "shape": "java-what-happens",
+          "prompt": "For each snippet, say what happens: what it prints, which exception it throws, or that it does not compile. (a) int[][] a = {{1, 2}, {3}}; System.out.println(a[1][1]); (b) int[][] a = new int[2][3]; a[0] = a[1]; a[0][0] = 7; System.out.println(a[1][0]); (c) String s = null; System.out.println(s.length()); (d) int[] a = new int[3]; System.out.println(a.length());",
+          "key": "(a) ArrayIndexOutOfBoundsException; (b) prints 7; (c) NullPointerException; (d) does not compile",
+          "keyStatus": "mock",
+          "notes": "(a): row 1 has length 1. (b): after a[0] = a[1], both slots refer to the same row. (d): length is a field on arrays, so it takes no parentheses; String has the length() method. All four were checked with javac/java."
+        },
+        {
+          "id": "5.2",
+          "points": 12,
+          "shape": "java-2d-array",
+          "prompt": "Write pascal(n), which returns the first n rows of Pascal's triangle as a jagged array: row i has length i + 1, starts and ends with 1, and each inner entry is the sum of the two entries above it. pascal(4) is {{1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}}, and pascal(0) is an array with no rows. Assume n >= 0.",
+          "code": "public static int[][] pascal(int n) {\n    ____\n}",
+          "key": "public static int[][] pascal(int n) {\n    int[][] tri = new int[n][];\n    for (int i = 0; i < n; i++) {\n        tri[i] = new int[i + 1];\n        tri[i][0] = 1;\n        tri[i][i] = 1;\n        for (int j = 1; j < i; j++) {\n            tri[i][j] = tri[i - 1][j - 1] + tri[i - 1][j];\n        }\n    }\n    return tri;\n}",
+          "keyStatus": "mock",
+          "notes": "new int[n][n] gives rows of the wrong length (not jagged): take off points. Forgetting to allocate each row (new int[n][] with no tri[i] = new int[i + 1]) causes a NullPointerException."
+        }
+      ]
+    }
+  ]
+}

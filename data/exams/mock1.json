@@ -1,0 +1,260 @@
+{
+  "id": "mock1",
+  "kind": "mock",
+  "title": "Mock exam 1",
+  "blurb": "Closest to the Fall 2025 paper: one of each question shape at the usual difficulty.",
+  "points": 120,
+  "minutes": 60,
+  "sections": [
+    {
+      "id": "1",
+      "title": "OCaml and Java Concepts; Tail Recursion",
+      "points": 20,
+      "items": [
+        {
+          "id": "1.1",
+          "points": 8,
+          "shape": "concept-tf",
+          "prompt": "True or false? (a) In Java, after int[] a = new int[3];, every element of a is 0. (b) In OCaml, Some 3 == Some 3 is guaranteed to evaluate to true. (c) In Java, a static method can read an instance field of its own class directly, without going through an object. (d) In OCaml, a function value stored on the heap carries the bindings for the free variables it uses.",
+          "key": "(a) True; (b) False; (c) False; (d) True",
+          "keyStatus": "mock",
+          "notes": "(b): each Some 3 is its own constructor expression, so OCaml makes no promise that they are the same heap cell; == is physical equality. (c): static methods have no this, so there is no instance to read a field from. (d) is the definition of a closure."
+        },
+        {
+          "id": "1.2",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec count_pos (l : int list) (acc : int) : int =\n  begin match l with\n  | [] -> acc\n  | x :: tl -> if x > 0 then count_pos tl (acc + 1) else count_pos tl acc\n  end",
+          "key": "Tail recursive",
+          "keyStatus": "mock",
+          "notes": "Both branches of the if end in the recursive call, and the if is the whole match arm."
+        },
+        {
+          "id": "1.3",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec sum_opts (l : int option list) : int =\n  begin match l with\n  | [] -> 0\n  | None :: tl -> sum_opts tl\n  | Some x :: tl -> x + sum_opts tl\n  end",
+          "key": "Not tail recursive",
+          "keyStatus": "mock",
+          "notes": "The None arm is a tail call, but the Some arm still has to add x after the call returns. One non-tail call is enough to make the function not tail recursive."
+        },
+        {
+          "id": "1.4",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive?",
+          "code": "let rec any_neg (l : int list) : bool =\n  begin match l with\n  | [] -> false\n  | x :: tl -> x < 0 || any_neg tl\n  end",
+          "key": "Tail recursive",
+          "keyStatus": "mock",
+          "notes": "The right operand of || is in tail position: if x < 0 is false, the result is exactly any_neg tl."
+        },
+        {
+          "id": "1.5",
+          "points": 3,
+          "shape": "tail-rec",
+          "prompt": "Is this function tail recursive? (is_empty and deq are the usual Homework 4 queue functions.)",
+          "code": "let rec drain (q : int queue) (acc : int) : int =\n  if is_empty q then acc\n  else (let x = deq q in drain q (acc + x))",
+          "key": "Tail recursive",
+          "keyStatus": "mock",
+          "notes": "The call to deq happens before the recursive call and finishes first. The recursive call is the body of the let, so nothing is left to do after it returns."
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Queues",
+      "points": 34,
+      "items": [
+        {
+          "id": "2.1",
+          "points": 10,
+          "shape": "trace-heap",
+          "prompt": "Draw (or describe) the heap after dup_evens q runs, where q is a valid queue holding [2; 3; 4]: q.head points to node n2 (v = 2), n2.next to n3 (v = 3), n3.next to n4 (v = 4), n4.next = None, and q.tail points to n4. Say where every next pointer and q.head/q.tail point, and mark any new nodes.",
+          "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option;\n                  mutable tail : 'a qnode option }\n\n   let dup_evens (q : int queue) : unit =\n     let rec loop (qno : int qnode option) : unit =\n       begin match qno with\n       | None -> ()\n       | Some qn ->\n         if qn.v mod 2 = 0 then begin\n           let copy = { v = qn.v; next = qn.next } in\n           qn.next <- Some copy;\n           loop copy.next\n         end else loop qn.next\n       end\n     in loop q.head",
+          "key": "Two new nodes are allocated: c2 (copy of n2) and c4 (copy of n4).\nq.head -> Some n2\nn2.next -> Some c2;  c2.next -> Some n3\nn3.next -> Some n4\nn4.next -> Some c4;  c4.next = None\nq.tail -> Some n4   (unchanged: still the original 4 node)\nto_list q = [2; 2; 3; 4; 4]",
+          "keyStatus": "mock",
+          "notes": "Each copy is linked in right after its original and takes over the original's old next pointer. The loop jumps to copy.next, so a copy is never copied again. Take points off if q.tail moves: nothing in the code writes q.tail."
+        },
+        {
+          "id": "2.2",
+          "points": 2,
+          "shape": "invariant-check",
+          "prompt": "After the call in 2.1, are the queue invariants preserved? Queue invariant: (1) head and tail are both None or both Some; (2) if head = Some h and tail = Some t, then (2a) t is reachable from h by following next pointers and (2b) t.next = None.",
+          "key": "No",
+          "keyStatus": "mock",
+          "notes": "q.tail is the original 4 node, and its next is now Some c4."
+        },
+        {
+          "id": "2.3",
+          "points": 6,
+          "shape": "invariant-check",
+          "prompt": "Which invariant can dup_evens break, and for exactly which inputs? Then give a one-line fix inside the then-branch.",
+          "key": "(2b) breaks exactly when the last node's value is even: that node gets a copy after it, but q.tail still points at it, so q.tail's next is Some copy. (1) and (2a) always hold, and a queue whose last value is odd stays valid.\nFix: after qn.next <- Some copy; add\n  if copy.next = None then q.tail <- Some copy;",
+          "keyStatus": "mock",
+          "notes": "Full credit for any fix that moves q.tail to the copy when the copied node was the tail, for example checking qn.next = None before linking the copy in. An empty queue is unaffected."
+        },
+        {
+          "id": "2.4",
+          "points": 16,
+          "shape": "queue-program",
+          "prompt": "Write remove_all, which removes every node whose value equals x from a valid queue and leaves a valid queue (update head and tail when needed). It must be tail recursive. Example: if q holds [1; 2; 1; 3; 1], then after remove_all 1 q, to_list q = [2; 3]; if every node is removed, the queue becomes empty.",
+          "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option;\n                  mutable tail : 'a qnode option }\n\n   let remove_all (x : 'a) (q : 'a queue) : unit =\n     ____",
+          "key": "let remove_all (x : 'a) (q : 'a queue) : unit =\n  let rec loop (prev : 'a qnode option) (curr : 'a qnode option) : unit =\n    begin match curr with\n    | None -> q.tail <- prev\n    | Some n ->\n      if n.v = x then begin\n        (begin match prev with\n         | None -> q.head <- n.next\n         | Some p -> p.next <- n.next\n         end);\n        loop prev n.next\n      end else loop curr n.next\n    end\n  in loop None q.head",
+          "keyStatus": "mock",
+          "notes": "Rubric idea: 4 pts walk the list with a prev pointer, 4 pts unlink (head case vs middle case), 4 pts fix the tail at the end (prev is the last node kept, or None if everything was removed), 4 pts tail recursion. A common bug: moving prev forward after deleting a node."
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "OCaml ASM, Mutable State, and Closures",
+      "points": 18,
+      "items": [
+        {
+          "id": "3.1",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "After the code below runs, is a == b true or false?",
+          "code": "type t = { mutable n : int }\nlet a = { n = 1 }\nlet b = a\nlet c = { n = 1 }\n;; b.n <- 5",
+          "key": "True (b is another name for the same record)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.2",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.1. Is a = c true or false?",
+          "key": "False (a.n is 5 because b aliases a; c.n is still 1)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.3",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.1. Is a.n + c.n = 6 true or false?",
+          "key": "True (5 + 1)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.4",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "What is the value of x at the point marked HERE?",
+          "code": "type counter = { incr : unit -> unit; get : unit -> int }\n\nlet mk_counter (start : int) : counter =\n  let r = { contents = start } in\n  { incr = (fun () -> r.contents <- r.contents + 1);\n    get  = (fun () -> r.contents) }\n\nlet c1 = mk_counter 10\nlet c2 = c1\nlet c3 = mk_counter 10\n;; c1.incr ()\n;; c2.incr ()\n;; c3.incr ()\nlet x = c1.get () + c3.get ()\n(* HERE *)",
+          "key": "23  (c1 and c2 share one counter: 10 + 1 + 1 = 12; c3 has its own: 10 + 1 = 11)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.5",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.4. Which identifiers have bindings on the stack at HERE? Choose all that apply: mk_counter, start, r, c1, c2, c3, x.",
+          "key": "mk_counter, c1, c2, c3, x",
+          "keyStatus": "mock",
+          "notes": "start and r are only on the stack while mk_counter runs; afterwards they survive only inside the closures' saved environments."
+        },
+        {
+          "id": "3.6",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.4. How many records with a contents field (the r cells) are on the heap at HERE?",
+          "key": "2",
+          "keyStatus": "mock",
+          "notes": "mk_counter is called twice. let c2 = c1 copies a reference, not the counter."
+        },
+        {
+          "id": "3.7",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.4. Which bindings must be saved in the closure stored in c1.get? Choose all that apply: mk_counter, start, r, c1, x.",
+          "key": "r only",
+          "keyStatus": "mock",
+          "notes": "fun () -> r.contents mentions only r. It reads start's value indirectly through r."
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "GUI Programming in OCaml",
+      "points": 28,
+      "items": [
+        {
+          "id": "4.1",
+          "points": 14,
+          "shape": "gui-build",
+          "prompt": "Finish tally: a label showing a count (starting at \"0\"), a \"+1\" button that adds one, and a \"Reset\" button that sets the count back to 0. The count lives in an int value_controller, and the label must update whenever the value changes. Return the widget (the label, then the two buttons, each with a border, side by side) and the controller.",
+          "code": "let tally () : widget * int value_controller =\n  let vc = ____ in\n  let count_w, count_lc = label \"0\" in\n  let plus_w, _, plus_nc = button \"+1\" in\n  let reset_w, _, reset_nc = button \"Reset\" in\n  (* keep the label in sync with the value *)\n  vc.add_change_listener (____);\n  (* +1 button *)\n  ____.add_event_listener (mouseclick_listener (____));\n  (* Reset button *)\n  ____;\n  (* return the widget and the controller *)\n  ____",
+          "key": "let tally () : widget * int value_controller =\n  let vc = make_controller 0 in\n  let count_w, count_lc = label \"0\" in\n  let plus_w, _, plus_nc = button \"+1\" in\n  let reset_w, _, reset_nc = button \"Reset\" in\n  vc.add_change_listener (fun (v : int) -> count_lc.set_label (string_of_int v));\n  plus_nc.add_event_listener\n    (mouseclick_listener (fun () -> vc.change_value (vc.get_value () + 1)));\n  reset_nc.add_event_listener (mouseclick_listener (fun () -> vc.change_value 0));\n  (hlist [border count_w; border plus_w; border reset_w], vc)",
+          "keyStatus": "mock",
+          "notes": "Change listeners run on every change_value, so the buttons only need to change the value; the label follows. hpair nesting in place of hlist is fine."
+        },
+        {
+          "id": "4.2",
+          "points": 8,
+          "shape": "gui-build",
+          "prompt": "Write keypress_listener c action: an event_listener that calls action () when the event is a key press of the character c, and does nothing for every other event.",
+          "code": "let keypress_listener (c : char) (action : unit -> unit) : event_listener =\n  ____",
+          "key": "let keypress_listener (c : char) (action : unit -> unit) : event_listener =\n  fun (g : Gctx.gctx) (e : Gctx.event) ->\n    begin match Gctx.event_type e with\n    | Gctx.KeyPress k -> if k = c then action ()\n    | _ -> ()\n    end",
+          "keyStatus": "mock",
+          "notes": "Writing KeyPress without the Gctx. prefix is fine (the exam allows ;; open Gctx). Matching | KeyPress c -> does not compare against the argument: it binds a new c that shadows it, so every key would fire. Take off points for that."
+        },
+        {
+          "id": "4.3",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "In a correct tally from 4.1, delete the vc.add_change_listener line. What happens? (a) It no longer compiles. (b) It compiles, but clicking +1 never changes what the label shows. (c) It compiles and works the same. (d) It compiles, but +1 raises an exception.",
+          "key": "(b) It compiles, but clicking +1 never changes what the label shows",
+          "keyStatus": "mock",
+          "notes": "The stored value still goes up; nothing copies it into the label."
+        },
+        {
+          "id": "4.4",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "In a correct tally, replace vc.change_value 0 in the Reset listener with count_lc.set_label \"0\". After clicking +1 twice, Reset, then +1 once, what does the label show? (a) 0 (b) 1 (c) 3 (d) It does not compile.",
+          "key": "(c) 3",
+          "keyStatus": "mock",
+          "notes": "Reset only repaints the label; the controller still holds 2, so the next +1 sets it to 3."
+        },
+        {
+          "id": "4.5",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "In a correct tally, add the Reset button's listener before the +1 button's listener (swap those two statements). What changes? (a) Nothing. (b) Reset now runs before every +1. (c) It no longer compiles. (d) The buttons swap places on screen.",
+          "key": "(a) Nothing",
+          "keyStatus": "mock",
+          "notes": "Each listener is attached to a different button's notifier, so their order does not matter. Layout comes only from the returned hlist."
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Java Arrays",
+      "points": 20,
+      "items": [
+        {
+          "id": "5.1",
+          "points": 4,
+          "shape": "java-what-happens",
+          "prompt": "What happens when this runs? (a) prints 0 (b) prints null (c) throws NullPointerException (d) does not compile",
+          "code": "int[][] a = new int[2][];\nSystem.out.println(a[0]);",
+          "key": "(b) prints null",
+          "keyStatus": "mock",
+          "notes": "new int[2][] makes the outer array only; its slots hold null. Printing a null reference prints \"null\". Nothing is dereferenced, so there is no exception."
+        },
+        {
+          "id": "5.2",
+          "points": 16,
+          "shape": "java-2d-array",
+          "prompt": "Write columnSums for a possibly jagged 2D array. grid itself is non-null, but individual rows may be null (treat them as empty) and rows may have different lengths. Return an array whose length is the longest row length (0 if there are no non-empty rows), where entry j is the sum of grid[i][j] over every row that has a column j. Example: {{1, 2, 3}, {4}, {5, 6}} gives {10, 8, 3}; {{1}, null, {2, 5}} gives {3, 5}.",
+          "code": "public static int[] columnSums(int[][] grid) {\n    ____\n}",
+          "key": "public static int[] columnSums(int[][] grid) {\n    int width = 0;\n    for (int i = 0; i < grid.length; i++) {\n        if (grid[i] != null && grid[i].length > width) {\n            width = grid[i].length;\n        }\n    }\n    int[] sums = new int[width];\n    for (int i = 0; i < grid.length; i++) {\n        if (grid[i] == null) {\n            continue;\n        }\n        for (int j = 0; j < grid[i].length; j++) {\n            sums[j] += grid[i][j];\n        }\n    }\n    return sums;\n}",
+          "keyStatus": "mock",
+          "notes": "Rubric idea: 5 pts find the max width while skipping null rows, 3 pts allocate the result, 6 pts sum with each row's own bound (grid[i].length, not grid[0].length), 2 pts return. Using grid[0].length as the width fails on both examples."
+        }
+      ]
+    }
+  ]
+}

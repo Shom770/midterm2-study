@@ -1,0 +1,249 @@
+{
+  "id": "mock2",
+  "kind": "mock",
+  "title": "Mock exam 2",
+  "blurb": "Harder than a real paper: deque surgery, a trace that leaves a stale pointer, and a cyclic-equality trap.",
+  "points": 120,
+  "minutes": 60,
+  "sections": [
+    {
+      "id": "1",
+      "title": "Concepts and Tail Recursion",
+      "points": 20,
+      "items": [
+        {
+          "id": "1.1",
+          "points": 8,
+          "shape": "concept-tf",
+          "prompt": "True or false? (a) In Java, if s.equals(t) is true for two String variables, then s == t is also true. (b) In Java, after int[] a = {1, 2}; int[] b = a; b[0] = 9;, a[0] is still 1. (c) In OCaml, a record field that is not declared mutable can never change after the record is created. (d) In Java, s.toUpperCase() changes the String object s in place.",
+          "key": "(a) False; (b) False; (c) True; (d) False",
+          "keyStatus": "mock",
+          "notes": "(a): equals compares characters, == compares references. (b): b is an alias for a. (d): Strings are immutable; toUpperCase returns a new String."
+        },
+        {
+          "id": "1.2",
+          "points": 12,
+          "shape": "tail-rec",
+          "prompt": "take_while below is not tail recursive. Write take_while_tr, which returns the same result on every input and uses constant stack space. You may define your own helpers but may not use any standard library functions (no List.rev, no @).",
+          "code": "let rec take_while (p : 'a -> bool) (l : 'a list) : 'a list =\n  begin match l with\n  | [] -> []\n  | x :: tl -> if p x then x :: take_while p tl else []\n  end\n\nlet take_while_tr (p : 'a -> bool) (l : 'a list) : 'a list =\n  ____",
+          "key": "let take_while_tr (p : 'a -> bool) (l : 'a list) : 'a list =\n  let rec rev (l : 'a list) (acc : 'a list) : 'a list =\n    begin match l with\n    | [] -> acc\n    | x :: tl -> rev tl (x :: acc)\n    end in\n  let rec loop (l : 'a list) (acc : 'a list) : 'a list =\n    begin match l with\n    | [] -> rev acc []\n    | x :: tl -> if p x then loop tl (x :: acc) else rev acc []\n    end\n  in loop l []",
+          "keyStatus": "mock",
+          "notes": "Two things to check: the accumulator must be reversed in both stopping cases (end of list and first failing element), and the reverse helper must itself be tail recursive. Stopping at the first failure without reversing returns the prefix backwards."
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Deques",
+      "points": 34,
+      "items": [
+        {
+          "id": "2.1",
+          "points": 6,
+          "shape": "invariant-check",
+          "prompt": "A deque d has three nodes A (v = 1), B (v = 2) and C (v = 3). d.head = Some A and d.tail = Some C. Next pointers: A.next = Some B, B.next = Some C, C.next = None. Prev pointers: A.prev = None, B.prev = Some C, C.prev = Some B. Which invariants are broken? Choose all that apply: (1), (2a), (2b), (2c), (2d), (2e), (2f), or Valid.",
+          "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\n   (* Deque invariant:\n      (1) head and tail are both None or both Some\n      (2) if head = Some h and tail = Some t:\n        (2a) t is reachable from h by next pointers\n        (2b) t.next = None\n        (2c) h is reachable from t by prev pointers\n        (2d) h.prev = None\n        (2e) for every node n, if n.next = Some m then m.prev = Some n\n        (2f) for every node n, if n.prev = Some m then m.next = Some n *)",
+          "key": "(2c), (2e), (2f)",
+          "keyStatus": "mock",
+          "notes": "(2c): following prev from C goes C -> B -> C -> ... and never reaches A. (2e): A.next = B but B.prev is C. (2f): B.prev = C but C.next is None. (2a), (2b) and (2d) hold."
+        },
+        {
+          "id": "2.2",
+          "points": 8,
+          "shape": "trace-heap",
+          "prompt": "d is a valid deque holding [1; 2; 3] in nodes n1, n2, n3 (all prev/next links correct, d.head = Some n1, d.tail = Some n3). Describe every pointer after mystery d runs: d.head, d.tail, and next and prev for each node.",
+          "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\n   let mystery (d : int deque) : unit =\n     begin match d.head, d.tail with\n     | Some h, Some t ->\n       if h == t then () else begin\n         let second = h.next in\n         h.next <- None;\n         h.prev <- d.tail;\n         t.next <- Some h;\n         d.tail <- Some h;\n         d.head <- second\n       end\n     | _ -> ()\n     end",
+          "key": "d.head -> Some n2;  d.tail -> Some n1\nn1.next = None;     n1.prev -> Some n3\nn2.next -> Some n3; n2.prev -> Some n1   (stale: never updated)\nn3.next -> Some n1; n3.prev -> Some n2\nFollowing next from the head gives [2; 3; 1].",
+          "keyStatus": "mock",
+          "notes": "mystery tries to rotate the first element to the back. h.prev <- d.tail runs before d.tail is changed, so n1.prev is the old tail n3, which is correct. The bug is that nobody clears second's prev."
+        },
+        {
+          "id": "2.3",
+          "points": 4,
+          "shape": "invariant-check",
+          "prompt": "After 2.2, which invariants are broken? Then give the missing statement that fixes mystery.",
+          "key": "(2d) and (2f). The new head n2 still has prev = Some n1, and n1.next is None, not Some n2.\nFix (before d.head <- second):\n  begin match second with\n  | Some s -> s.prev <- None\n  | None -> ()\n  end;",
+          "keyStatus": "mock",
+          "notes": "(2c) still holds: from n1, prev reaches n3 and then n2. Since h != t, second is always Some here, so the None arm is never used."
+        },
+        {
+          "id": "2.4",
+          "points": 16,
+          "shape": "deque-program",
+          "prompt": "Write reverse_in_place, which reverses a valid deque without allocating any nodes: afterwards to_list d is the reverse of what it was and d is still valid. It must be tail recursive. Hint: in each node, swap next and prev.",
+          "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\n   let reverse_in_place (d : 'a deque) : unit =\n     ____",
+          "key": "let reverse_in_place (d : 'a deque) : unit =\n  let rec loop (no : 'a dqnode option) : unit =\n    begin match no with\n    | None -> ()\n    | Some n ->\n      let nxt = n.next in\n      n.next <- n.prev;\n      n.prev <- nxt;\n      loop nxt\n    end\n  in\n  loop d.head;\n  let h = d.head in\n  d.head <- d.tail;\n  d.tail <- h",
+          "keyStatus": "mock",
+          "notes": "Save n.next before overwriting it; after the swap, n.next points backwards, so loop n.next walks the wrong way. Swapping head and tail must happen after the loop or use saved copies. Empty and one-node deques need no special case."
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "OCaml ASM, Equality, and Closures",
+      "points": 18,
+      "items": [
+        {
+          "id": "3.1",
+          "points": 6,
+          "shape": "code-to-heap",
+          "prompt": "Draw the stack and heap after this code runs. Show every Some cell as its own heap object.",
+          "code": "type node = { mutable v : int; mutable link : node option }\nlet a = { v = 1; link = None }\nlet b = { v = 2; link = Some a }\nlet c = { v = 3; link = b.link }\n;; a.link <- Some c\n;; c.v <- a.v + b.v",
+          "key": "Stack: a, b, c, each pointing to its own record.\nRecord A: v = 1, link -> S2 (a new Some cell) -> C\nRecord B: v = 2, link -> S1 (a Some cell) -> A\nRecord C: v = 3, link -> S1 (the same Some cell b.link points to)\nThere are two Some cells: S1 (made by Some a) and S2 (made by Some c). A and C now form a cycle: A -> S2 -> C -> S1 -> A.",
+          "keyStatus": "mock",
+          "notes": "c's link copies the pointer to b's existing Some cell; it does not allocate a new one. c.v ends up 1 + 2 = 3, so the last line changes nothing."
+        },
+        {
+          "id": "3.2",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.1. Is b.link == c.link true or false?",
+          "key": "True (both fields hold the same Some cell)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.3",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.1. Is a.link == Some c true or false?",
+          "key": "False (Some c on the right allocates a new Some cell)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.4",
+          "points": 2,
+          "shape": "eq-on-picture",
+          "prompt": "Same code as 3.1. What happens when a.link = Some c is evaluated? (a) true (b) false (c) it never finishes (it loops, possibly until memory runs out)",
+          "key": "(c) It never finishes",
+          "keyStatus": "mock",
+          "notes": "Structural = compares fields recursively and does not stop when it reaches the same object twice. Comparing C with C walks C -> A -> C -> ... around the cycle forever. Checked: the compiled program runs until it is killed."
+        },
+        {
+          "id": "3.5",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "What is the value of r3?",
+          "code": "let make_acc () : (int -> int) * (unit -> unit) =\n  let total = { contents = 0 } in\n  let add (x : int) : int =\n    total.contents <- total.contents + x; total.contents in\n  let reset () : unit = total.contents <- 0 in\n  (add, reset)\n\nlet (add1, reset1) = make_acc ()\nlet (add2, _) = make_acc ()\nlet r1 = add1 5\nlet r2 = add2 7\n;; reset1 ()\nlet r3 = add1 1 + add2 1",
+          "key": "9  (reset1 clears only the first accumulator: add1 1 = 1, add2 1 = 7 + 1 = 8)",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "3.6",
+          "points": 3,
+          "shape": "closures-asm",
+          "prompt": "Same code as 3.5. How many total cells exist on the heap, and which closures share each one?",
+          "key": "2. add1 and reset1 share the first; add2 (and the unnamed second reset) share the second.",
+          "keyStatus": "mock",
+          "notes": "Each call to make_acc allocates a new total; closures made in the same call capture the same one."
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "GUI Programming in OCaml",
+      "points": 28,
+      "items": [
+        {
+          "id": "4.1",
+          "points": 12,
+          "shape": "gui-build",
+          "prompt": "Finish traffic_light: a 50x50 canvas that draws a filled-color circle (draw_ellipse centered at (25, 25), radii 20) in the current light's color. Each mouse click advances the light Red -> Green -> Yellow -> Red. The state lives in a light value_controller that starts at Red.",
+          "code": "type light = Red | Yellow | Green\n\nlet next_light (l : light) : light =\n  begin match l with\n  | Red -> Green\n  | Green -> Yellow\n  | Yellow -> Red\n  end\n\nlet color_of (l : light) : Gctx.color =\n  begin match l with\n  | Red -> Gctx.red\n  | Yellow -> Gctx.yellow\n  | Green -> Gctx.green\n  end\n\nlet traffic_light () : widget * light value_controller =\n  let vc = ____ in\n  let repaint (g : Gctx.gctx) : unit =\n    Gctx.draw_ellipse (____) (25, 25) 20 20 in\n  let w, nc = ____ in\n  ____;\n  (w, vc)",
+          "key": "let traffic_light () : widget * light value_controller =\n  let vc = make_controller Red in\n  let repaint (g : Gctx.gctx) : unit =\n    Gctx.draw_ellipse (Gctx.with_color g (color_of (vc.get_value ()))) (25, 25) 20 20 in\n  let w, nc = canvas (50, 50) repaint in\n  nc.add_event_listener\n    (mouseclick_listener (fun () -> vc.change_value (next_light (vc.get_value ()))));\n  (w, vc)",
+          "keyStatus": "mock",
+          "notes": "The repaint function must read vc.get_value () each time it runs (see 4.6). with_color returns a new gctx; it does not change g."
+        },
+        {
+          "id": "4.2",
+          "points": 8,
+          "shape": "gui-build",
+          "prompt": "A client shows the light next to a label that reads \"STOP\" for Red, \"GO\" for Green and \"SLOW\" for Yellow, starting at \"STOP\". Write the client code: create both widgets, keep the label in sync, and bind the combined widget to top.",
+          "key": "let light_w, light_vc = traffic_light ()\nlet status_w, status_lc = label \"STOP\"\n;; light_vc.add_change_listener (fun (l : light) ->\n     status_lc.set_label\n       (begin match l with\n        | Red -> \"STOP\"\n        | Green -> \"GO\"\n        | Yellow -> \"SLOW\"\n        end))\nlet top = hpair light_w status_w",
+          "keyStatus": "mock",
+          "notes": "The client cannot reach the canvas's notifier (traffic_light does not return it), so the value controller's change listener is the only correct hook."
+        },
+        {
+          "id": "4.3",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "Questions 4.3 to 4.5 use the notifier implementation below. If two listeners are added to the same notifier, first L1 and then L2, which runs first when an event arrives? (a) L1 (b) L2 (c) only L2 runs (d) the order is unspecified",
+          "code": "let notifier (w : widget) : widget * notifier_controller =\n  let listeners = { contents = [] } in\n  { repaint = w.repaint;\n    handle = (fun (g : Gctx.gctx) (e : Gctx.event) ->\n      List.iter (fun h -> h g e) listeners.contents;\n      w.handle g e);\n    size = w.size },\n  { add_event_listener =\n      fun (newl : event_listener) ->\n        listeners.contents <- newl :: listeners.contents }",
+          "key": "(b) L2",
+          "keyStatus": "mock",
+          "notes": "New listeners are consed onto the front, and List.iter goes front to back. Both listeners run."
+        },
+        {
+          "id": "4.4",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "Same notifier code. What is the type of listeners?",
+          "key": "event_listener list ref  (that is, (Gctx.gctx -> Gctx.event -> unit) list ref, a record { mutable contents : ... })",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "4.5",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "Same notifier code. Does wrapping a widget in a notifier change how big it is on screen or how it is drawn? Explain in one sentence.",
+          "key": "No: repaint and size are copied straight from the child w; only handle changes.",
+          "keyStatus": "mock",
+          "notes": "Matches the library comment: a notifier \"doesn't take up any extra screen space\"."
+        },
+        {
+          "id": "4.6",
+          "points": 2,
+          "shape": "gui-edit",
+          "prompt": "In traffic_light, suppose repaint is written with let current = vc.get_value () in placed before the repaint definition, and repaint uses color_of current. What happens? (a) It does not compile. (b) It compiles and works the same. (c) The value changes on each click, but the light is always drawn red. (d) Clicking raises an exception.",
+          "key": "(c) The value changes on each click, but the light is always drawn red",
+          "keyStatus": "mock",
+          "notes": "current is evaluated once, when traffic_light runs, and the closure saves that Red. Checked in a simulation: after one click, get_value is Green and repaint still draws red."
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Java Arrays and Strings",
+      "points": 20,
+      "items": [
+        {
+          "id": "5.1",
+          "points": 2,
+          "shape": "java-what-happens",
+          "prompt": "What does this print?",
+          "code": "String c = \"ci\";\nString a = \"cis\";\nString b = c + \"s\";\nSystem.out.println(a == b);",
+          "key": "false",
+          "keyStatus": "mock",
+          "notes": "c + \"s\" builds a new String at runtime, so a and b are different objects (a.equals(b) is true). If both sides were literals, such as \"ci\" + \"s\", the compiler could fold them into one shared object, which is why the variable c is there."
+        },
+        {
+          "id": "5.2",
+          "points": 2,
+          "shape": "java-what-happens",
+          "prompt": "What happens? (a) prints 0 (b) prints 3 (c) NullPointerException (d) does not compile",
+          "code": "int[][] g = new int[3][];\nSystem.out.println(g[1].length);",
+          "key": "(c) NullPointerException",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "5.3",
+          "points": 2,
+          "shape": "java-what-happens",
+          "prompt": "What does this print?",
+          "code": "int[] x = {1, 2, 3};\nint[] y = x;\ny[0] = 9;\nSystem.out.println(x[0]);",
+          "key": "9",
+          "keyStatus": "mock"
+        },
+        {
+          "id": "5.4",
+          "points": 14,
+          "shape": "java-2d-array",
+          "prompt": "Write rotate90, which returns a new array holding m rotated 90 degrees clockwise. An r x c input gives a c x r result. Return null if m is null, has no rows, contains a null row, or is jagged (rows of different lengths). Do not modify m. Example: {{1, 2, 3}, {4, 5, 6}} gives {{4, 1}, {5, 2}, {6, 3}}.",
+          "code": "public static int[][] rotate90(int[][] m) {\n    ____\n}",
+          "key": "public static int[][] rotate90(int[][] m) {\n    if (m == null || m.length == 0 || m[0] == null) {\n        return null;\n    }\n    int rows = m.length;\n    int cols = m[0].length;\n    for (int i = 0; i < rows; i++) {\n        if (m[i] == null || m[i].length != cols) {\n            return null;\n        }\n    }\n    int[][] out = new int[cols][rows];\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            out[j][rows - 1 - i] = m[i][j];\n        }\n    }\n    return out;\n}",
+          "keyStatus": "mock",
+          "notes": "The mapping is out[j][rows - 1 - i] = m[i][j]. Check it on the example: m[0][0] = 1 goes to out[0][1]. out[j][i] gives the transpose, and out[cols-1-j][i] rotates counterclockwise; take off points for either."
+        }
+      ]
+    }
+  ]
+}

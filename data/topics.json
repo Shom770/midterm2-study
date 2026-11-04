@@ -1,16 +1,16 @@
 [
-  {"id": "tailrec", "title": "Tail recursion, list rewrites", "guide": "Ch 16", "cardTopics": ["tailrec"], "problems": [1, 2, 4, 5, 10, 12, 16, 17, 19, 21, 22, 33], "exams": ["26sp 1.1-1.2", "25fa 1.2-1.5", "24fa 1.1-1.5", "25sp 1.4-1.5"]},
-  {"id": "queues", "title": "Linked queues", "guide": "Ch 16", "cardTopics": ["queues"], "problems": [3, 7, 41, 43], "exams": ["25sp 1.1-1.6", "25fa 2.1-2.4"]},
-  {"id": "deques", "title": "Deques", "guide": "Ch 16", "cardTopics": ["deques", "testing"], "problems": [32, 34, 46], "exams": ["26sp 2.1-2.3", "24fa 2.1-2.3"]},
-  {"id": "queue-invariants", "title": "Queue invariants (1, 2a, 2b)", "guide": "Ch 16", "cardTopics": ["queues"], "problems": [], "exams": ["25sp 1.1", "25fa 2.2-2.3"]},
-  {"id": "deque-invariants", "title": "Deque invariants (1, 2a–2f)", "guide": "Ch 16", "cardTopics": ["deques"], "problems": [], "exams": ["24fa 2.1-2.2"]},
-  {"id": "asm", "title": "ASM diagrams, == vs =", "guide": "Ch 15", "cardTopics": ["asm", "mutability"], "problems": [35], "exams": ["26sp 3", "25fa 3.1-3.3", "24fa 3.1-3.3"]},
-  {"id": "closures", "title": "Closures and local state", "guide": "Ch 17", "cardTopics": ["closures"], "problems": [], "exams": ["25fa 3.4-3.7", "25sp 2.2"]},
+  {"id": "tailrec", "title": "Tail recursion, list rewrites", "guide": "Ch 16", "cardTopics": ["tailrec"], "problems": [1, 2, 4, 5, 10, 12, 16, 17, 19, 21, 22, 33], "exams": ["26sp 1.1-1.2", "25fa 1.2-1.5", "24fa 1.1-1.5", "25sp 1.4-1.5", "mock1 1.2-1.5", "mock2 1.2", "mock3 1.2-1.5"]},
+  {"id": "queues", "title": "Linked queues", "guide": "Ch 16", "cardTopics": ["queues"], "problems": [3, 7, 41, 43], "exams": ["25sp 1.1-1.6", "25fa 2.1-2.4", "mock1 2", "mock3 2"]},
+  {"id": "deques", "title": "Deques", "guide": "Ch 16", "cardTopics": ["deques", "testing"], "problems": [32, 34, 46], "exams": ["26sp 2.1-2.3", "24fa 2.1-2.3", "mock2 2"]},
+  {"id": "queue-invariants", "title": "Queue invariants (1, 2a, 2b)", "guide": "Ch 16", "cardTopics": ["queues"], "problems": [], "exams": ["25sp 1.1", "25fa 2.2-2.3", "mock1 2.2-2.3", "mock3 2.1-2.3"]},
+  {"id": "deque-invariants", "title": "Deque invariants (1, 2a–2f)", "guide": "Ch 16", "cardTopics": ["deques"], "problems": [], "exams": ["24fa 2.1-2.2", "mock2 2.1", "mock2 2.3"]},
+  {"id": "asm", "title": "ASM diagrams, == vs =", "guide": "Ch 15", "cardTopics": ["asm", "mutability"], "problems": [35], "exams": ["26sp 3", "25fa 3.1-3.3", "24fa 3.1-3.3", "mock1 3.1-3.3", "mock2 3.1-3.4", "mock3 3.5-3.7"]},
+  {"id": "closures", "title": "Closures and local state", "guide": "Ch 17", "cardTopics": ["closures"], "problems": [], "exams": ["25fa 3.4-3.7", "25sp 2.2", "mock1 3.4-3.7", "mock2 3.5-3.6", "mock3 3.1-3.4", "mock2 4.6"]},
   {"id": "options", "title": "Options", "guide": "Ch 11", "cardTopics": ["options"], "problems": [11, 13, 14], "exams": []},
   {"id": "unit-records", "title": "Unit, sequencing, records, mutable fields", "guide": "Ch 12–14", "cardTopics": ["unit", "records", "mutability"], "problems": [], "exams": []},
-  {"id": "gui", "title": "GUI library, notifiers, controllers", "guide": "Ch 18", "cardTopics": ["gui"], "problems": [], "exams": ["26sp 4.1-4.3", "25fa 4.1-4.5", "25sp 2.1-2.4", "24fa 4.1-4.2"]},
-  {"id": "arrays", "title": "Java arrays: 2D, ragged, aliasing", "guide": "Ch 21", "cardTopics": ["arrays"], "problems": [], "exams": ["26sp 5.1-5.2", "25fa 5", "25sp 3.1-3.5", "25sp 4.1-4.3", "24fa 5"]},
-  {"id": "java", "title": "Java classes, interfaces, static", "guide": "Ch 19–20", "cardTopics": ["java"], "problems": [], "exams": []},
+  {"id": "gui", "title": "GUI library, notifiers, controllers", "guide": "Ch 18", "cardTopics": ["gui"], "problems": [], "exams": ["26sp 4.1-4.3", "25fa 4.1-4.5", "25sp 2.1-2.4", "24fa 4.1-4.2", "mock1 4", "mock2 4", "mock3 4"]},
+  {"id": "arrays", "title": "Java arrays: 2D, ragged, aliasing", "guide": "Ch 21", "cardTopics": ["arrays"], "problems": [], "exams": ["26sp 5.1-5.2", "25fa 5", "25sp 3.1-3.5", "25sp 4.1-4.3", "24fa 5", "mock1 5", "mock2 5", "mock3 5"]},
+  {"id": "java", "title": "Java classes, interfaces, static", "guide": "Ch 19–20", "cardTopics": ["java"], "problems": [], "exams": ["mock2 5.1-5.3", "mock3 5.1"]},
   {"id": "encapsulation", "title": "Encapsulation (ResArray, QueueImpl)", "guide": "Ch 32–33", "cardTopics": ["encapsulation"], "problems": [], "exams": []},
-  {"id": "exam-skills", "title": "Question shapes and exam traps", "guide": "Exam guide", "cardTopics": ["shapes", "traps"], "problems": [], "exams": []}
+  {"id": "exam-skills", "title": "Question shapes and exam traps", "guide": "Exam guide", "cardTopics": ["shapes", "traps"], "problems": [], "exams": ["mock1 1.1", "mock2 1.1", "mock3 1.1"]}
 ]

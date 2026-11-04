@@ -1,0 +1,157 @@
+{
+  "26sp/5.1": {
+    "lang": "java",
+    "starter": "private static boolean isLocalPeak(int[][] grid, int r, int c) {\n    return false; // TODO\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    return 0; // TODO\n}\n",
+    "solution": "private static boolean isLocalPeak(int[][] grid, int r, int c) {\n    int val = grid[r][c];\n    int n = grid.length;\n    return (r <= 0 || val > grid[r - 1][c]) &&\n           (r >= n - 1 || val > grid[r + 1][c]) &&\n           (c <= 0 || val > grid[r][c - 1]) &&\n           (c >= n - 1 || val > grid[r][c + 1]);\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    int count = 0;\n    for (int r = 0; r < grid.length; r++)\n        for (int c = 0; c < grid.length; c++)\n            if (isLocalPeak(grid, r, c)) count++;\n    return count;\n}\n",
+    "tests": "static void tests() {\n    check(\"example 1 has one peak\", () -> countLocalPeaks(new int[][]{{10,12,11},{9,20,15},{8,14,13}}) == 1);\n    check(\"example 2 has two corner peaks\", () -> countLocalPeaks(new int[][]{{50,30,5},{10,12,8},{2,4,25}}) == 2);\n    check(\"1x1 grid is a peak\", () -> countLocalPeaks(new int[][]{{7}}) == 1);\n    check(\"equal neighbours are not peaks\", () -> countLocalPeaks(new int[][]{{1,1},{1,1}}) == 0);\n}\n"
+  },
+  "mock1/5.2": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "public static int[] columnSums(int[][] grid) {\n    return null; // TODO\n}\n",
+    "solution": "public static int[] columnSums(int[][] grid) {\n    int width = 0;\n    for (int i = 0; i < grid.length; i++) {\n        if (grid[i] != null && grid[i].length > width) {\n            width = grid[i].length;\n        }\n    }\n    int[] sums = new int[width];\n    for (int i = 0; i < grid.length; i++) {\n        if (grid[i] == null) {\n            continue;\n        }\n        for (int j = 0; j < grid[i].length; j++) {\n            sums[j] += grid[i][j];\n        }\n    }\n    return sums;\n}\n",
+    "tests": "static void tests() {\n    check(\"{{1, 2, 3}, {4}, {5, 6}} gives {10, 8, 3}\", () -> java.util.Arrays.equals(columnSums(new int[][]{{1, 2, 3}, {4}, {5, 6}}), new int[]{10, 8, 3}));\n    check(\"{{1}, null, {2, 5}} gives {3, 5}\", () -> java.util.Arrays.equals(columnSums(new int[][]{{1}, null, {2, 5}}), new int[]{3, 5}));\n    check(\"no rows gives an empty array\", () -> java.util.Arrays.equals(columnSums(new int[][]{}), new int[]{}));\n    check(\"only null rows gives an empty array\", () -> java.util.Arrays.equals(columnSums(new int[][]{null, null}), new int[]{}));\n    check(\"empty rows are skipped\", () -> java.util.Arrays.equals(columnSums(new int[][]{{}, {7}, {}}), new int[]{7}));\n    check(\"longest row is not the first\", () -> java.util.Arrays.equals(columnSums(new int[][]{{1}, {1, 1, 1}}), new int[]{2, 1, 1}));\n    check(\"1x1 grid\", () -> java.util.Arrays.equals(columnSums(new int[][]{{-4}}), new int[]{-4}));\n}\n"
+  },
+  "mock2/5.4": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "public static int[][] rotate90(int[][] m) {\n    return null; // TODO\n}\n",
+    "solution": "public static int[][] rotate90(int[][] m) {\n    if (m == null || m.length == 0 || m[0] == null) {\n        return null;\n    }\n    int rows = m.length;\n    int cols = m[0].length;\n    for (int i = 0; i < rows; i++) {\n        if (m[i] == null || m[i].length != cols) {\n            return null;\n        }\n    }\n    int[][] out = new int[cols][rows];\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            out[j][rows - 1 - i] = m[i][j];\n        }\n    }\n    return out;\n}\n",
+    "tests": "static void tests() {\n    check(\"{{1, 2, 3}, {4, 5, 6}} gives {{4, 1}, {5, 2}, {6, 3}}\", () -> java.util.Arrays.deepEquals(rotate90(new int[][]{{1, 2, 3}, {4, 5, 6}}), new int[][]{{4, 1}, {5, 2}, {6, 3}}));\n    check(\"2x2 square\", () -> java.util.Arrays.deepEquals(rotate90(new int[][]{{1, 2}, {3, 4}}), new int[][]{{3, 1}, {4, 2}}));\n    check(\"one row becomes one column\", () -> java.util.Arrays.deepEquals(rotate90(new int[][]{{1, 2, 3}}), new int[][]{{1}, {2}, {3}}));\n    check(\"1x1\", () -> java.util.Arrays.deepEquals(rotate90(new int[][]{{9}}), new int[][]{{9}}));\n    check(\"null input gives null\", () -> rotate90(null) == null);\n    check(\"no rows gives null\", () -> rotate90(new int[][]{}) == null);\n    check(\"a null row gives null\", () -> rotate90(new int[][]{{1, 2}, null}) == null);\n    check(\"a null first row gives null\", () -> rotate90(new int[][]{null, {1, 2}}) == null);\n    check(\"jagged input gives null\", () -> rotate90(new int[][]{{1, 2}, {3}}) == null);\n    check(\"does not modify the input\", () -> {\n        int[][] m = {{1, 2}, {3, 4}};\n        rotate90(m);\n        return java.util.Arrays.deepEquals(m, new int[][]{{1, 2}, {3, 4}});\n    });\n}\n"
+  },
+  "mock3/5.2": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "public static int[][] pascal(int n) {\n    return null; // TODO\n}\n",
+    "solution": "public static int[][] pascal(int n) {\n    int[][] tri = new int[n][];\n    for (int i = 0; i < n; i++) {\n        tri[i] = new int[i + 1];\n        tri[i][0] = 1;\n        tri[i][i] = 1;\n        for (int j = 1; j < i; j++) {\n            tri[i][j] = tri[i - 1][j - 1] + tri[i - 1][j];\n        }\n    }\n    return tri;\n}\n",
+    "tests": "static void tests() {\n    check(\"pascal(4)\", () -> java.util.Arrays.deepEquals(pascal(4), new int[][]{{1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}}));\n    check(\"pascal(0) has no rows\", () -> pascal(0) != null && pascal(0).length == 0);\n    check(\"pascal(1)\", () -> java.util.Arrays.deepEquals(pascal(1), new int[][]{{1}}));\n    check(\"rows are jagged: row i has length i + 1\", () -> {\n        int[][] t = pascal(6);\n        for (int i = 0; i < 6; i++) if (t[i].length != i + 1) return false;\n        return true;\n    });\n    check(\"row 6 of pascal(7) is 1 6 15 20 15 6 1\", () -> java.util.Arrays.equals(pascal(7)[6], new int[]{1, 6, 15, 20, 15, 6, 1}));\n}\n"
+  },
+  "25fa/5": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "// return an m x n reshaped array if possible, null otherwise\npublic static int[][] reshape(int[] input, int m, int n) {\n    // Check whether it is possible for the input array to be reshaped.\n    // If it is not, return null.\n\n    // Copy over the elements of the input array into the reshaped array.\n    int[][] result = new int[m][n];\n\n    return result; // TODO\n}\n",
+    "solution": "// return an m x n reshaped array if possible, null otherwise\npublic static int[][] reshape(int[] input, int m, int n) {\n    if (input.length <= (m - 1) * n || input.length > m * n) {\n        return null;\n    }\n    int[][] result = new int[m][n];\n    int curr = 0;\n    for (int row = 0; row < m; row++) {\n        for (int col = 0; col < n && curr < input.length; col++) {\n            result[row][col] = input[curr];\n            curr++;\n        }\n    }\n    return result;\n}\n",
+    "tests": "static void tests() {\n    int[] in8 = {5, 2, 8, 1, 3, 4, 7, 6};\n    check(\"exam example: 8 values into 3 x 3\", () -> java.util.Arrays.deepEquals(reshape(in8, 3, 3), new int[][]{{5, 2, 8}, {1, 3, 4}, {7, 6, 0}}));\n    check(\"exact fit: 8 values into 2 x 4\", () -> java.util.Arrays.deepEquals(reshape(in8, 2, 4), new int[][]{{5, 2, 8, 1}, {3, 4, 7, 6}}));\n    check(\"one row: 8 values into 1 x 8\", () -> java.util.Arrays.deepEquals(reshape(in8, 1, 8), new int[][]{in8}));\n    check(\"last row holds one value: 5 values into 3 x 2\", () -> java.util.Arrays.deepEquals(reshape(new int[]{1, 2, 3, 4, 5}, 3, 2), new int[][]{{1, 2}, {3, 4}, {5, 0}}));\n    check(\"too small: 8 values into 2 x 3 is null\", () -> reshape(in8, 2, 3) == null);\n    check(\"too big: 8 values into 4 x 3 leaves the last row empty, so null\", () -> reshape(in8, 4, 3) == null);\n    check(\"too big: 8 values into 3 x 4 leaves the last row empty, so null\", () -> reshape(in8, 3, 4) == null);\n    check(\"0 rows is null\", () -> reshape(in8, 0, 8) == null);\n}\n"
+  },
+  "25sp/4.3": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "/* Copy a rectangular array of size h * w from the input, starting at\n   the upper left corner. Returns null if any part of the input is null,\n   h or w is negative, or if the input array does not contain enough\n   values. */\npublic static int[][] extractRectangle(int h, int w, int[][] input) {\n    return null; // TODO\n}\n",
+    "solution": "public static int[][] extractRectangle(int h, int w, int[][] input) {\n    if (input == null || w < 0 || h < 0 || h > input.length) {\n        return null;\n    }\n    int[][] output = new int[h][w];\n    for (int i = 0; i < h; i++) {\n        // the row must be non-null and long enough\n        if (input[i] == null || w > input[i].length) {\n            return null;\n        }\n        for (int j = 0; j < w; j++) {\n            output[i][j] = input[i][j];\n        }\n    }\n    // none of the remaining rows may be null\n    for (int i = h; i < input.length; i++) {\n        if (input[i] == null) {\n            return null;\n        }\n    }\n    return output;\n}\n",
+    "tests": "static void tests() {\n    check(\"exam example: 2 x 1 from a jagged input\", () -> java.util.Arrays.deepEquals(extractRectangle(2, 1, new int[][]{{1, 2, 3}, {4}, {7, 8, 9, 10}}), new int[][]{{1}, {4}}));\n    check(\"exam example: first row too short gives null\", () -> extractRectangle(2, 3, new int[][]{{1, 2}, {4, 5, 6}, {7, 8, 9}}) == null);\n    check(\"0 x 0 gives an empty array, not null\", () -> java.util.Arrays.deepEquals(extractRectangle(0, 0, new int[][]{{1, 2}, {4, 5, 6}}), new int[][]{}));\n    check(\"whole input\", () -> java.util.Arrays.deepEquals(extractRectangle(2, 2, new int[][]{{1, 2}, {3, 4}}), new int[][]{{1, 2}, {3, 4}}));\n    check(\"null input gives null\", () -> extractRectangle(0, 0, null) == null);\n    check(\"negative h gives null\", () -> extractRectangle(-1, 1, new int[][]{{1}}) == null);\n    check(\"negative w gives null\", () -> extractRectangle(1, -1, new int[][]{{1}}) == null);\n    check(\"more rows than the input has gives null\", () -> extractRectangle(3, 1, new int[][]{{1}, {2}}) == null);\n    check(\"a null row inside the rectangle gives null\", () -> extractRectangle(2, 1, new int[][]{{1}, null}) == null);\n    check(\"a null row below the rectangle also gives null\", () -> extractRectangle(1, 1, new int[][]{{1}, null}) == null);\n    check(\"result is a copy, not the input's rows\", () -> {\n        int[][] in = {{1, 2}, {3, 4}};\n        int[][] out = extractRectangle(2, 2, in);\n        out[0][0] = 99;\n        return in[0][0] == 1 && out[0] != in[0];\n    });\n}\n"
+  },
+  "25sp/4.1": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "// Fill in the expected result of extractRectangle(0, 0, input)\n// for input = { {1, 2}, {4, 5, 6}, {7, 8, 9, 10} }.\nstatic int[][] expected = null; // TODO\n",
+    "solution": "static int[][] expected = {};\n",
+    "tests": "static void tests() {\n    int[][] input = { {1, 2}, {4, 5, 6}, {7, 8, 9, 10} };\n    check(\"assertArrayEquals(expected, extractRectangle(0, 0, input))\", () -> java.util.Arrays.deepEquals(expected, extractRectangle(0, 0, input)));\n}\n",
+    "setup": "  // The official extractRectangle, so you can test your expected value against it.\n  public static int[][] extractRectangle(int h, int w, int[][] input) {\n      if (input == null || w < 0 || h < 0 || h > input.length) {\n          return null;\n      }\n      int[][] output = new int[h][w];\n      for (int i = 0; i < h; i++) {\n          // the row must be non-null and long enough\n          if (input[i] == null || w > input[i].length) {\n              return null;\n          }\n          for (int j = 0; j < w; j++) {\n              output[i][j] = input[i][j];\n          }\n      }\n      // none of the remaining rows may be null\n      for (int i = h; i < input.length; i++) {\n          if (input[i] == null) {\n              return null;\n          }\n      }\n      return output;\n  }\n"
+  },
+  "25sp/4.2": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "// Pick an input for which extractRectangle(0, 0, input) returns null.\nstatic int[][] input = { {1} }; // TODO\n",
+    "solution": "static int[][] input = null;\n",
+    "tests": "static void tests() {\n    check(\"assertNull(extractRectangle(0, 0, input))\", () -> extractRectangle(0, 0, input) == null);\n}\n",
+    "setup": "  // The official extractRectangle, so you can test your input against it.\n  public static int[][] extractRectangle(int h, int w, int[][] input) {\n      if (input == null || w < 0 || h < 0 || h > input.length) {\n          return null;\n      }\n      int[][] output = new int[h][w];\n      for (int i = 0; i < h; i++) {\n          // the row must be non-null and long enough\n          if (input[i] == null || w > input[i].length) {\n              return null;\n          }\n          for (int j = 0; j < w; j++) {\n              output[i][j] = input[i][j];\n          }\n      }\n      // none of the remaining rows may be null\n      for (int i = h; i < input.length; i++) {\n          if (input[i] == null) {\n              return null;\n          }\n      }\n      return output;\n  }\n"
+  },
+  "24fa/5": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "private static boolean isSubArray(int[][] small, int[][] big,\n                                  int row, int col) {\n    int m = small.length;\n    return false; // TODO\n}\n\npublic static int numberOfAppearances(int[][] small, int[][] big) {\n    int m = small.length;\n    int n = big.length;\n    int count = 0;\n    // TODO\n    return count;\n}\n",
+    "solution": "private static boolean isSubArray(int[][] small, int[][] big,\n                                  int row, int col) {\n    int m = small.length;\n    for (int i = 0; i < m; i++) {\n        for (int j = 0; j < m; j++) {\n            if (small[i][j] != big[row + i][col + j]) {\n                return false;\n            }\n        }\n    }\n    return true;\n}\n\npublic static int numberOfAppearances(int[][] small, int[][] big) {\n    int m = small.length;\n    int n = big.length;\n    int count = 0;\n    for (int i = 0; i <= n - m; i++) {\n        for (int j = 0; j <= n - m; j++) {\n            if (isSubArray(small, big, i, j)) {\n                count++;\n            }\n        }\n    }\n    return count;\n}\n",
+    "tests": "static void tests() {\n    int[][] small = {{1, 1}, {2, 2}};\n    int[][] big = {{1, 1, 9, 9}, {2, 2, 9, 9}, {9, 1, 1, 1}, {9, 2, 2, 2}};\n    check(\"exam example gives 3\", () -> numberOfAppearances(small, big) == 3);\n    check(\"isSubArray at (0, 0) of the example\", () -> isSubArray(small, big, 0, 0));\n    check(\"isSubArray at (0, 1) of the example is false\", () -> !isSubArray(small, big, 0, 1));\n    check(\"small equal to big gives 1\", () -> numberOfAppearances(big, big) == 1);\n    check(\"1x1 small counts every matching cell\", () -> numberOfAppearances(new int[][]{{9}}, big) == 6);\n    check(\"overlapping matches all count\", () -> numberOfAppearances(new int[][]{{1, 1}, {1, 1}}, new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}) == 4);\n    check(\"no match gives 0\", () -> numberOfAppearances(new int[][]{{5}}, big) == 0);\n    check(\"match touching the bottom-right corner\", () -> numberOfAppearances(new int[][]{{4}}, new int[][]{{0, 0}, {0, 4}}) == 1);\n}\n"
+  },
+  "26sp/5.2": {
+    "lang": "java",
+    "mode": "tests",
+    "starter": "// 5.2 asks you to explain this in English. Here you can try it for real:\n// change countLocalPeaks (and isLocalPeak) so they work on jagged grids.\nprivate static boolean isLocalPeak(int[][] grid, int r, int c) {\n    int val = grid[r][c];\n    int n = grid.length;\n    return (r <= 0     || val > grid[r - 1][c]) &&\n           (r >= n - 1 || val > grid[r + 1][c]) &&\n           (c <= 0     || val > grid[r][c - 1]) &&\n           (c >= n - 1 || val > grid[r][c + 1]);\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    int peakCount = 0;\n    int n = grid.length;\n    for (int r = 0; r < n; r++)\n        for (int c = 0; c < n; c++)\n            if (isLocalPeak(grid, r, c)) peakCount++;\n    return peakCount;\n}\n",
+    "solution": "// -1 when (r, c) is outside the grid; values are positive, so -1 never blocks a peak.\nprivate static int lookup(int[][] grid, int r, int c) {\n    if (r < 0 || r >= grid.length || c < 0 || c >= grid[r].length) {\n        return -1;\n    }\n    return grid[r][c];\n}\n\nprivate static boolean isLocalPeak(int[][] grid, int r, int c) {\n    int val = grid[r][c];\n    return val > lookup(grid, r - 1, c) && val > lookup(grid, r + 1, c)\n        && val > lookup(grid, r, c - 1) && val > lookup(grid, r, c + 1);\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    int peakCount = 0;\n    for (int r = 0; r < grid.length; r++)\n        for (int c = 0; c < grid[r].length; c++)\n            if (isLocalPeak(grid, r, c)) peakCount++;\n    return peakCount;\n}\n",
+    "tests": "static void tests() {\n    check(\"square example 1 still gives 1\", () -> countLocalPeaks(new int[][]{{10, 12, 11}, {9, 20, 15}, {8, 14, 13}}) == 1);\n    check(\"square example 2 still gives 2\", () -> countLocalPeaks(new int[][]{{50, 30, 5}, {10, 12, 8}, {2, 4, 25}}) == 2);\n    check(\"exam's jagged example gives 4\", () -> countLocalPeaks(new int[][]{{1, 1, 1, 2}, {1, 2}, {2, 1, 1, 3}, {1, 2, 1, 3, 1, 1}}) == 4);\n    check(\"rectangular 2 x 3\", () -> countLocalPeaks(new int[][]{{5, 1, 5}, {1, 1, 1}}) == 2);\n    check(\"single long row\", () -> countLocalPeaks(new int[][]{{1, 3, 2, 4}}) == 2);\n    check(\"a short row above a long one\", () -> countLocalPeaks(new int[][]{{1}, {1, 9}}) == 1);\n}\n"
+  },
+  "mock1/5.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict the output first, then press Run.\nint[][] a = new int[2][];\nSystem.out.println(a[0]);\n",
+    "solution": "// Predict the output first, then press Run.\nint[][] a = new int[2][];\nSystem.out.println(a[0]);\n"
+  },
+  "mock2/5.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict the output first, then press Run.\nString c = \"ci\";\nString a = \"cis\";\nString b = c + \"s\";\nSystem.out.println(a == b);\n\n// Compare: equals checks the characters, and two literals can share one object.\nSystem.out.println(\"a.equals(b): \" + a.equals(b));\nSystem.out.println(\"\\\"cis\\\" == \\\"ci\\\" + \\\"s\\\": \" + (\"cis\" == \"ci\" + \"s\"));\n",
+    "solution": "// Predict the output first, then press Run.\nString c = \"ci\";\nString a = \"cis\";\nString b = c + \"s\";\nSystem.out.println(a == b);\n\n// Compare: equals checks the characters, and two literals can share one object.\nSystem.out.println(\"a.equals(b): \" + a.equals(b));\nSystem.out.println(\"\\\"cis\\\" == \\\"ci\\\" + \\\"s\\\": \" + (\"cis\" == \"ci\" + \"s\"));\n"
+  },
+  "mock2/5.2": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict what happens first, then press Run.\nint[][] g = new int[3][];\ntry {\n    System.out.println(g[1].length);\n} catch (Exception e) {\n    System.out.println(\"threw \" + e.getClass().getSimpleName());\n}\n",
+    "solution": "// Predict what happens first, then press Run.\nint[][] g = new int[3][];\ntry {\n    System.out.println(g[1].length);\n} catch (Exception e) {\n    System.out.println(\"threw \" + e.getClass().getSimpleName());\n}\n"
+  },
+  "mock2/5.3": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict the output first, then press Run.\nint[] x = {1, 2, 3};\nint[] y = x;\ny[0] = 9;\nSystem.out.println(x[0]);\n",
+    "solution": "// Predict the output first, then press Run.\nint[] x = {1, 2, 3};\nint[] y = x;\ny[0] = 9;\nSystem.out.println(x[0]);\n"
+  },
+  "mock3/5.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict each answer first, then press Run.\n{\n    System.out.print(\"(a) \");\n    int[][] a = {{1, 2}, {3}};\n    try { System.out.println(a[1][1]); }\n    catch (Exception e) { System.out.println(\"threw \" + e.getClass().getSimpleName()); }\n}\n{\n    System.out.print(\"(b) \");\n    int[][] a = new int[2][3];\n    a[0] = a[1];\n    a[0][0] = 7;\n    System.out.println(a[1][0]);\n}\n{\n    System.out.print(\"(c) \");\n    String s = null;\n    try { System.out.println(s.length()); }\n    catch (Exception e) { System.out.println(\"threw \" + e.getClass().getSimpleName()); }\n}\n// (d) does not compile, so it can't run alongside the others.\n// Uncomment these two lines to see the compile error:\n// int[] d = new int[3];\n// System.out.println(d.length());\n",
+    "solution": "// Predict each answer first, then press Run.\n{\n    System.out.print(\"(a) \");\n    int[][] a = {{1, 2}, {3}};\n    try { System.out.println(a[1][1]); }\n    catch (Exception e) { System.out.println(\"threw \" + e.getClass().getSimpleName()); }\n}\n{\n    System.out.print(\"(b) \");\n    int[][] a = new int[2][3];\n    a[0] = a[1];\n    a[0][0] = 7;\n    System.out.println(a[1][0]);\n}\n{\n    System.out.print(\"(c) \");\n    String s = null;\n    try { System.out.println(s.length()); }\n    catch (Exception e) { System.out.println(\"threw \" + e.getClass().getSimpleName()); }\n}\n// (d) does not compile, so it can't run alongside the others.\n// Uncomment these two lines to see the compile error:\n// int[] d = new int[3];\n// System.out.println(d.length());\n"
+  },
+  "25sp/3.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict what happens first, then press Run.\nString[] s = {};\nint result = s.length;\nSystem.out.println(result);\n",
+    "solution": "// Predict what happens first, then press Run.\nString[] s = {};\nint result = s.length;\nSystem.out.println(result);\n"
+  },
+  "25sp/3.2": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict the output first, then press Run.\nString s1 = \"Java\";\nString s2 = new String(\"Java\");\nSystem.out.println(s1.equals(s2));\n\n// Compare with reference equality:\nSystem.out.println(\"s1 == s2: \" + (s1 == s2));\n",
+    "solution": "// Predict the output first, then press Run.\nString s1 = \"Java\";\nString s2 = new String(\"Java\");\nSystem.out.println(s1.equals(s2));\n\n// Compare with reference equality:\nSystem.out.println(\"s1 == s2: \" + (s1 == s2));\n"
+  },
+  "25sp/3.3": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict the output first, then press Run.\nString s1 = \"Java\";\nchar[] a1 = s1.toCharArray();\nchar[] a2 = { 'J', 'a', 'v', 'a' };\nSystem.out.println(a1 == a2);\n\n// Compare: Arrays.equals checks the contents.\nSystem.out.println(\"Arrays.equals(a1, a2): \" + Arrays.equals(a1, a2));\n",
+    "solution": "// Predict the output first, then press Run.\nString s1 = \"Java\";\nchar[] a1 = s1.toCharArray();\nchar[] a2 = { 'J', 'a', 'v', 'a' };\nSystem.out.println(a1 == a2);\n\n// Compare: Arrays.equals checks the contents.\nSystem.out.println(\"Arrays.equals(a1, a2): \" + Arrays.equals(a1, a2));\n"
+  },
+  "25sp/3.4": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Predict what happens first, then press Run.\nString[] arr = { \"Java\", \"OCaml\"};\ntry {\n    String last = arr[arr.length];\n    System.out.println(last);\n} catch (Exception e) {\n    System.out.println(\"threw \" + e.getClass().getSimpleName());\n}\n",
+    "solution": "// Predict what happens first, then press Run.\nString[] arr = { \"Java\", \"OCaml\"};\ntry {\n    String last = arr[arr.length];\n    System.out.println(last);\n} catch (Exception e) {\n    System.out.println(\"threw \" + e.getClass().getSimpleName());\n}\n"
+  },
+  "25sp/3.5": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// Which of these create a String[] holding \"1\", \"2\", \"3\"? Predict, then Run.\n{\n    String[] arr = {\"1\", \"2\", \"3\"};\n    System.out.println(\"A: \" + Arrays.toString(arr));\n}\n{\n    String arr = new String(new char[]{'1', '2', '3'});\n    System.out.println(\"B: a single String, not an array: \" + arr);\n}\n{\n    String[] arr = { new String(\"1\"), new String(\"2\"), new String(\"3\")};\n    System.out.println(\"D: \" + Arrays.toString(arr));\n}\n// C does not compile, so it can't run alongside the others.\n// Uncomment this line to see the compile error:\n// String[] c = new int[]{1, 2, 3};\n",
+    "solution": "// Which of these create a String[] holding \"1\", \"2\", \"3\"? Predict, then Run.\n{\n    String[] arr = {\"1\", \"2\", \"3\"};\n    System.out.println(\"A: \" + Arrays.toString(arr));\n}\n{\n    String arr = new String(new char[]{'1', '2', '3'});\n    System.out.println(\"B: a single String, not an array: \" + arr);\n}\n{\n    String[] arr = { new String(\"1\"), new String(\"2\"), new String(\"3\")};\n    System.out.println(\"D: \" + Arrays.toString(arr));\n}\n// C does not compile, so it can't run alongside the others.\n// Uncomment this line to see the compile error:\n// String[] c = new int[]{1, 2, 3};\n"
+  },
+  "mock1/1.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// The Java statements from 1.1. (b) and (d) are about OCaml, so they aren't here.\nSystem.out.print(\"(a) new int[3] holds: \");\nint[] a = new int[3];\nSystem.out.println(Arrays.toString(a));\n\n// (c) A static method has no `this`, so it can't read an instance field.\n// Uncomment the `return count;` line to see the compile error.\nclass Demo {\n    int count = 5;\n    static int peek() {\n        // return count;\n        return 0;\n    }\n}\nSystem.out.println(\"(c) Demo.peek() compiles only while `return count;` stays commented out\");\n",
+    "solution": "// The Java statements from 1.1. (b) and (d) are about OCaml, so they aren't here.\nSystem.out.print(\"(a) new int[3] holds: \");\nint[] a = new int[3];\nSystem.out.println(Arrays.toString(a));\n\n// (c) A static method has no `this`, so it can't read an instance field.\n// Uncomment the `return count;` line to see the compile error.\nclass Demo {\n    int count = 5;\n    static int peek() {\n        // return count;\n        return 0;\n    }\n}\nSystem.out.println(\"(c) Demo.peek() compiles only while `return count;` stays commented out\");\n"
+  },
+  "mock2/1.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// The Java statements from 1.1. (c) is about OCaml, so it isn't here.\n{\n    System.out.print(\"(a) equals but not ==: \");\n    String s = \"cis\";\n    String t = new String(\"cis\");\n    System.out.println(\"s.equals(t) = \" + s.equals(t) + \", s == t = \" + (s == t));\n}\n{\n    System.out.print(\"(b) a[0] after b[0] = 9: \");\n    int[] a = {1, 2};\n    int[] b = a;\n    b[0] = 9;\n    System.out.println(a[0]);\n}\n{\n    System.out.print(\"(d) s after s.toUpperCase(): \");\n    String s = \"cis\";\n    s.toUpperCase();\n    System.out.println(s);\n}\n",
+    "solution": "// The Java statements from 1.1. (c) is about OCaml, so it isn't here.\n{\n    System.out.print(\"(a) equals but not ==: \");\n    String s = \"cis\";\n    String t = new String(\"cis\");\n    System.out.println(\"s.equals(t) = \" + s.equals(t) + \", s == t = \" + (s == t));\n}\n{\n    System.out.print(\"(b) a[0] after b[0] = 9: \");\n    int[] a = {1, 2};\n    int[] b = a;\n    b[0] = 9;\n    System.out.println(a[0]);\n}\n{\n    System.out.print(\"(d) s after s.toUpperCase(): \");\n    String s = \"cis\";\n    s.toUpperCase();\n    System.out.println(s);\n}\n"
+  },
+  "mock3/1.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// The Java statements from 1.1. (b) and (c) are about OCaml, so they aren't here.\n{\n    System.out.print(\"(a) an int[] variable holding null: \");\n    int[] a = null;\n    System.out.println(a);\n}\n{\n    System.out.print(\"(d) == on two ints with the same value: \");\n    int x = 1200;\n    int y = 1200;\n    System.out.println(x == y);\n}\n",
+    "solution": "// The Java statements from 1.1. (b) and (c) are about OCaml, so they aren't here.\n{\n    System.out.print(\"(a) an int[] variable holding null: \");\n    int[] a = null;\n    System.out.println(a);\n}\n{\n    System.out.print(\"(d) == on two ints with the same value: \");\n    int x = 1200;\n    int y = 1200;\n    System.out.println(x == y);\n}\n"
+  },
+  "25fa/1.1": {
+    "lang": "java",
+    "mode": "run",
+    "starter": "// The Java parts of 1.1. (c) and (d) are about OCaml, so they aren't here.\n{\n    System.out.print(\"(a) length after allocation, then after 'growing': \");\n    int[] a = new int[3];\n    System.out.print(a.length + \" \");\n    a = Arrays.copyOf(a, 5); // makes a NEW array; the old one is still length 3\n    System.out.println(a.length);\n}\n{\n    System.out.print(\"(b) Java == on equal-looking objects: \");\n    String s = new String(\"hi\");\n    String t = new String(\"hi\");\n    System.out.println(s == t);\n}\n",
+    "solution": "// The Java parts of 1.1. (c) and (d) are about OCaml, so they aren't here.\n{\n    System.out.print(\"(a) length after allocation, then after 'growing': \");\n    int[] a = new int[3];\n    System.out.print(a.length + \" \");\n    a = Arrays.copyOf(a, 5); // makes a NEW array; the old one is still length 3\n    System.out.println(a.length);\n}\n{\n    System.out.print(\"(b) Java == on equal-looking objects: \");\n    String s = new String(\"hi\");\n    String t = new String(\"hi\");\n    System.out.println(s == t);\n}\n"
+  }
+}

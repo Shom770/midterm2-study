@@ -1,5 +1,6 @@
 {
   "id": "26sp",
+  "kind": "past",
   "title": "Spring 2026 Midterm II",
   "date": "2026-03-30",
   "instructors": "Benjamin Pierce",
@@ -19,7 +20,7 @@
           "prompt": "Finish reverse_tr, a tail-recursive version of the non-tail-recursive reverse. It must give the same results and use bounded stack space. No standard library functions, including @.",
           "code": "let rec reverse (l : 'a list) : 'a list =\n  begin match l with\n  | [] -> []\n  | hd :: tl -> (reverse tl) @ [hd]\n  end\n\nlet reverse_tr (l : 'a list) : 'a list =\n  let rec loop (m : 'a list) (acc : 'a list) : 'a list =\n    ____\n  in\n  ____",
           "key": "let reverse_tr (l : 'a list) : 'a list =\n  let rec loop (m : 'a list) (acc : 'a list) : 'a list =\n    begin match m with\n    | [] -> acc\n    | hd :: tl -> loop tl (hd :: acc)\n    end\n  in loop l []",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "1.2",
@@ -28,8 +29,8 @@
           "prompt": "Rewrite transform (map) so it is tail recursive, with the same results and constant stack use. Helpers you define yourself are allowed; standard library functions are not.",
           "code": "let rec transform (f : 'a -> 'b) (l : 'a list) : 'b list =\n  begin match l with\n  | [] -> []\n  | x :: xs -> f x :: transform f xs\n  end\n\nlet transform_tr (f : 'a -> 'b) (l : 'a list) : 'b list =\n  ____",
           "key": "let transform_tr (f : 'a -> 'b) (l : 'a list) : 'b list =\n  let rec loop (acc : 'b list) (rest : 'a list) : 'b list =\n    begin match rest with\n    | [] -> reverse_tr acc\n    | hd :: tl -> loop (f hd :: acc) tl\n    end\n  in loop [] l",
-          "keyStatus": "from-guide",
-          "notes": "The key calls reverse_tr from 1.1. The exam allows helpers you define yourself, so this is fine."
+          "keyStatus": "official",
+          "notes": "The official solution calls reverse_tr from 1.1, which counts as a helper you defined yourself."
         }
       ]
     },
@@ -44,8 +45,8 @@
           "shape": "code-to-heap",
           "prompt": "Draw the stack and heap after merge d1 d2. The BEFORE picture shows d1 as [18; 9] (head is the 18 node, tail is the 9 node) and d2 as [102; 64], with prev/next links in both directions. Add the arrows and Some blobs for the AFTER state; the four nodes and the two deque records are already drawn.",
           "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\nlet d1 = create ()\nlet d2 = create ()\n;; insert_head 9 d1\n;; insert_head 64 d2\n;; insert_head 18 d1\n;; insert_head 102 d2\n(* BEFORE *)\n;; merge d1 d2\n(* AFTER *)",
-          "key": "d1 = [18, 9, 102, 64]: d1.head -> Some(18 node), d1.tail -> Some(64 node). 18.prev = None, 18.next -> Some 9; 9.prev -> Some 18, 9.next -> Some 102; 102.prev -> Some 9, 102.next -> Some 64; 64.prev -> Some 102, 64.next = None. d2 is empty: head and tail both None. All prev/next links are mirrored.",
-          "keyStatus": "derived"
+          "key": "d1 = [18; 9; 102; 64]: d1.head -> Some 18-node, d1.tail -> Some 64-node. 9.next -> Some 102-node and 102.prev -> Some 9-node; every other link is unchanged. d2.head and d2.tail are both None.",
+          "keyStatus": "official"
         },
         {
           "id": "2.2",
@@ -54,8 +55,8 @@
           "prompt": "Fill in merge so it appends all of d2's nodes to the end of d1 and leaves d2 empty. Handle the cases where d2 is empty, where d1 is empty, and where both are non-empty.",
           "code": "type 'a dqnode = {\n  v : 'a;\n  mutable next : 'a dqnode option;\n  mutable prev : 'a dqnode option;\n}\ntype 'a deque = {\n  mutable head : 'a dqnode option;\n  mutable tail : 'a dqnode option;\n}\n\nlet merge (d1 : 'a deque) (d2 : 'a deque) : unit =\n  if not (valid d1) then failwith \"merge: given invalid deque\";\n  if not (valid d2) then failwith \"merge: given invalid deque\";\n  begin match d2.head with\n  | None -> ____\n  | Some n ->\n    begin match d1.tail with\n    | None -> ____\n    | Some m -> ____\n    end\n  end",
           "key": "let merge (d1 : 'a deque) (d2 : 'a deque) : unit =\n  begin match d2.head with\n  | None -> ()\n  | Some n ->\n    begin match d1.tail with\n    | None ->\n      d1.head <- d2.head; d1.tail <- d2.tail;\n      d2.head <- None; d2.tail <- None\n    | Some m ->\n      m.next <- d2.head; n.prev <- d1.tail;\n      d1.tail <- d2.tail;\n      d2.head <- None; d2.tail <- None\n    end\n  end",
-          "keyStatus": "from-guide",
-          "notes": "The key leaves out the two given 'valid' checks at the top; those are already in the skeleton. The exam's signature has an extra pair of parentheses, ((d2: 'a deque)), which is harmless."
+          "keyStatus": "official",
+          "notes": "The skeleton already has the two valid checks at the top. The exam's ((d2: 'a deque)) has an extra, harmless pair of parentheses."
         },
         {
           "id": "2.3",
@@ -63,9 +64,9 @@
           "shape": "test-writing",
           "prompt": "Finish a property-based test: given op lists ops1 and ops2 that build d1 and d2, merge them, then check that d1 holds the concatenation and d2 is empty. Library functions such as @ are allowed.",
           "code": "let property ((ops1, ops2) : int op list * int op list) : bool =\n  let d1 : int deque = init_with ops1 in\n  let d2 : int deque = init_with ops2 in\n  let l1 = to_list d1 in\n  let l2 = to_list d2 in\n  (* Fill in here... *)",
-          "key": "merge d1 d2;\nto_list d1 = l1 @ l2 && is_empty d2 && valid d1",
-          "keyStatus": "from-guide",
-          "notes": "The brief's key describes the boolean check 'after merge d1 d2'. The answer must actually call merge d1 d2 first, so 'merge d1 d2;' is written into the key. Checking 'valid d1' is extra; the prompt only asks for concatenation and emptiness."
+          "key": "merge d1 d2;\nto_list d1 = l1 @ l2",
+          "keyStatus": "official",
+          "notes": "The official answer only checks the concatenation. The prompt also says d2 becomes empty, so adding && to_list d2 = [] is a stricter, also-correct answer."
         }
       ]
     },
@@ -80,9 +81,9 @@
           "shape": "heap-to-code",
           "prompt": "Write code that builds the pictured stack and heap. p1 points to node {v=1}, whose next is Some of the node p2 points to ({v=3}). That node's next is Some of p3's node ({v=5}), and the 5 node's next points back to Some of the 3 node, forming a cycle.",
           "code": "type 'a qnode = { v : 'a;\n                 mutable next : 'a qnode option }\n\nlet p1 = ____",
-          "key": "",
-          "keyStatus": "none",
-          "notes": "The exam does not number a subpart here; the whole 5-point section is one question (3.1 is our label). No key in the brief. One possible answer: let p3 = {v = 5; next = None} let p2 = {v = 3; next = Some p3} let p1 = {v = 1; next = Some p2} ;; p3.next <- Some p2 (the exam starts with 'let p1 =', so p1 may need to be built through nested lets or reassigned bindings)."
+          "key": "let p1 = {v = 1; next = None}\nlet p2 = {v = 3; next = None}\nlet p3 = {v = 5; next = None}\n;; p2.next <- Some p3\n;; p3.next <- Some p2\n;; p1.next <- p3.next",
+          "keyStatus": "official",
+          "notes": "The exam doesn't number a subpart here; 3.1 is our label for the whole 5-point question. p1.next <- p3.next reuses the Some cell from p3.next, so p1 and p3 share one Some p2 cell, as in the picture."
         }
       ]
     },
@@ -98,8 +99,8 @@
           "prompt": "Finish combination_btn: a 50x50 canvas that draws the digit at (20,14) and calls on_click value when it is clicked.",
           "code": "let combination_btn (value : int) (on_click : int -> unit -> unit)\n  : widget =\n  let s = string_of_int value in\n  let repaint_square (gc : gctx) : unit =\n    (* Display the string s at coordinates (20,14) *)\n    ____\n  in\n  let square_w, square_nc = canvas (50, 50) repaint_square in\n  (* When clicked, call the on_click function passed in *)\n  ____ (mouseclick_listener (____));\n  square_w",
           "key": "let repaint_square (gc : gctx) : unit = Gctx.draw_string gc (20, 14) s in\nlet square_w, square_nc = canvas (50, 50) repaint_square in\nsquare_nc.add_event_listener (mouseclick_listener (on_click value));\nsquare_w",
-          "keyStatus": "from-guide",
-          "notes": "Blanks: draw_string gc (20, 14) s; square_nc.add_event_listener; on_click value. on_click value has type unit -> unit, which is what mouseclick_listener expects."
+          "keyStatus": "official",
+          "notes": "on_click value has type unit -> unit, which is what mouseclick_listener expects."
         },
         {
           "id": "4.2",
@@ -108,8 +109,8 @@
           "prompt": "In combination_lock's check-button listener, set the status label to \"Correct!\" or \"Incorrect!\" depending on whether the entered digits match the password, then clear current_digits.",
           "code": "let combination_lock (password : int list) : widget =\n  let status_w, status_lc = label \"No password entered!\" in\n  let current_digits = {contents = []} in\n  let add_digit (value : int) () : unit =\n    current_digits.contents <- value :: current_digits.contents in\n  let check_btn, _, check_nc = button \"Check Password\" in\n  check_nc.add_event_listener (mouseclick_listener (fun () ->\n    (if List.rev current_digits.contents = password then\n       ____\n     else\n       ____);\n    (* Set current_digits to an empty list *)\n    ____));\n  vlist [ (hlist [combination_btn 1 add_digit; space (10, 10);\n                  combination_btn 2 add_digit]);\n          space (10, 10);\n          (hlist [combination_btn 3 add_digit; space (10, 10);\n                  combination_btn 4 add_digit]);\n          space (10, 10);\n          border check_btn;\n          space (10, 10);\n          status_w ]",
           "key": "(if List.rev current_digits.contents = password\n then status_lc.set_label \"Correct!\"\n else status_lc.set_label \"Incorrect!\");\ncurrent_digits.contents <- []",
-          "keyStatus": "from-guide",
-          "notes": "The printed exam has an extra '));' line after the last blank, which looks like a typo. It is dropped from the code shown here."
+          "keyStatus": "official",
+          "notes": "The printed exam has a stray '));' after the last blank; it is dropped here."
         },
         {
           "id": "4.3",
@@ -117,7 +118,7 @@
           "shape": "gui-edit",
           "prompt": "Multiple choice: if the code that adds check_btn's event listener is removed, what changes? Options: check_btn no longer renders; a runtime error because buttons need a listener; current_digits is no longer updated when digit buttons are pressed; status_w never updates even when check_btn is clicked.",
           "key": "The code compiles, but status_w never updates even if check_btn is clicked.",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         }
       ]
     },
@@ -133,7 +134,7 @@
           "prompt": "Implement isLocalPeak and countLocalPeaks for an n x n grid of positive ints. A local peak is strictly greater than every existing up/down/left/right neighbor. Examples: [[10,12,11],[9,20,15],[8,14,13]] gives 1, and [[50,30,5],[10,12,8],[2,4,25]] gives 2.",
           "code": "private static boolean isLocalPeak(int[][] grid, int r, int c) {\n    ____\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    ____\n}",
           "key": "private static boolean isLocalPeak(int[][] grid, int r, int c) {\n    int val = grid[r][c];\n    int n = grid.length;\n    return (r <= 0     || val > grid[r - 1][c]) &&\n           (r >= n - 1 || val > grid[r + 1][c]) &&\n           (c <= 0     || val > grid[r][c - 1]) &&\n           (c >= n - 1 || val > grid[r][c + 1]);\n}\n\npublic static int countLocalPeaks(int[][] grid) {\n    int peakCount = 0;\n    int n = grid.length;\n    for (int r = 0; r < n; r++)\n        for (int c = 0; c < n; c++)\n            if (isLocalPeak(grid, r, c)) peakCount++;\n    return peakCount;\n}",
-          "keyStatus": "from-guide"
+          "keyStatus": "official"
         },
         {
           "id": "5.2",
@@ -141,8 +142,8 @@
           "shape": "explain-english",
           "prompt": "Explain in English how to change your solution so it works when the grid is rectangular or jagged (rows of different lengths). In the example jagged grid, rows are [1,1,1,2], [1,2], [2,1,1,3] and [1,2,1,3,1,1], and the answer is 4.",
           "key": "Add a helper lookup(grid, r, c) that returns -1 when (r, c) is out of bounds (check 0 <= r < grid.length and 0 <= c < grid[r].length), and the cell value otherwise. Compare each cell against lookup of its four neighbors; since all values are positive, -1 never blocks a peak. In countLocalPeaks, loop c from 0 to grid[r].length instead of n.",
-          "keyStatus": "from-guide",
-          "notes": "Wording slightly expanded from the brief to name the row-bound check. Checked on the example: peaks are (0,3), (1,1), (2,0) and (3,1), which gives 4. (0,3) has no cell below it because row 1 has only 2 columns; the two 3s at (2,3) and (3,3) are equal, so neither counts."
+          "keyStatus": "official",
+          "notes": "The official answer says r > grid.length and c > grid[r].length; the correct out-of-bounds tests are >=. Checked on the example: peaks at (0,3), (1,1), (2,0) and (3,1) give 4."
         }
       ]
     }

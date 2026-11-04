@@ -1,5 +1,6 @@
 {
   "id": "25sp",
+  "kind": "past",
   "title": "Spring 2025 Midterm II",
   "date": "2025-03-28",
   "instructors": "",
@@ -19,8 +20,8 @@
           "prompt": "The pictured almost-queue q1 has a single node (v = 1) whose next field points back to itself, with head and tail both pointing to that node. Which part of the queue invariant does it break: (1), (2a), (2b), or is it valid?",
           "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nInvariant:\n(1) head and tail are both None or both Some\n(2) if head = Some h and tail = Some t:\n  (2a) t is reachable from h by following next pointers\n  (2b) t.next = None",
           "key": "(2b)",
-          "keyStatus": "derived",
-          "notes": "(1) and (2a) hold (head and tail are both Some node1, and t = h is trivially reachable). node1.next = Some node1, which is not None, so (2b) fails. The q1 picture is not readable in the text extraction, so this description comes from the brief."
+          "keyStatus": "official",
+          "notes": "head and tail are both Some node1, so (1) and (2a) hold. node1.next = Some node1, not None, so (2b) fails."
         },
         {
           "id": "1.2",
@@ -29,7 +30,7 @@
           "prompt": "Write make_q1 () so that let q1 = make_q1 () produces the pictured almost-queue q1: one node with v = 1 whose next points to itself, and head and tail both pointing to that node.",
           "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet make_q1 () : int queue =\n  ____",
           "key": "let make_q1 () : int queue =\n  let q1n = {v = 1; next = None} in\n  q1n.next <- Some q1n;\n  {head = Some q1n; tail = Some q1n}",
-          "keyStatus": "derived"
+          "keyStatus": "official"
         },
         {
           "id": "1.3",
@@ -38,7 +39,7 @@
           "prompt": "Fill in the expected result of contains_qn qn1 [qn2; qn3], where qn2 is bound to the same node as qn1 and contains_qn uses physical equality (==).",
           "code": "let rec contains_qn (e : 'a qnode) (l : 'a qnode list) : bool =\n  begin match l with\n  | [] -> false\n  | hd :: tl -> if e == hd then true else contains_qn e tl\n  end\n\nlet test () : bool =\n  let qn1 = { v = 1 ; next = None } in\n  let qn2 = qn1 in\n  let qn3 = { v = 3 ; next = Some qn1 } in\n  contains_qn qn1 [ qn2 ; qn3 ] = ____",
           "key": "true",
-          "keyStatus": "derived",
+          "keyStatus": "official",
           "notes": "qn2 is an alias for qn1 (same heap node), so qn1 == qn2 holds on the first list element."
         },
         {
@@ -48,7 +49,8 @@
           "prompt": "Is contains_qn tail recursive?",
           "code": "let rec contains_qn (e : 'a qnode) (l : 'a qnode list) : bool =\n  begin match l with\n  | [] -> false\n  | hd :: tl -> if e == hd then true else contains_qn e tl\n  end",
           "key": "Tail recursive (the recursive call is the whole else branch).",
-          "keyStatus": "derived"
+          "keyStatus": "derived",
+          "notes": "The official solution PDF leaves both boxes unmarked for this item. Tail recursive is the answer by the usual rule."
         },
         {
           "id": "1.5",
@@ -57,7 +59,7 @@
           "prompt": "Is the given mystery function on bool queues tail recursive? (You don't need to work out what it computes.)",
           "code": "let mystery (q : bool queue) : bool =\n  let rec loop (qno : bool qnode option) : bool =\n    begin match qno with\n    | None -> true\n    | Some qn -> loop qn.next && qn.v\n    end in\n  loop q.head",
           "key": "Not tail recursive (left operand of &&).",
-          "keyStatus": "derived",
+          "keyStatus": "official",
           "notes": "Function application binds tighter than &&, so the body is (loop qn.next) && qn.v; qn.v must still be checked after the call returns."
         },
         {
@@ -66,9 +68,9 @@
           "shape": "queue-program",
           "prompt": "Complete remove_cycle, which truncates an almost-queue so that the first node referring to itself or to an earlier node becomes the last node. A valid queue must be left unchanged. Fill in the Some next_qn branch and the final call to loop. You may use contains_qn but no other library functions.",
           "code": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet rec contains_qn (e : 'a qnode) (l : 'a qnode list) : bool =\n  begin match l with\n  | [] -> false\n  | hd :: tl -> if e == hd then true else contains_qn e tl\n  end\n\nlet remove_cycle (q: 'a queue) : unit =\n  let rec loop (qno : 'a qnode option) (l: 'a qnode list) : unit =\n    begin match qno with\n    | None -> ()\n    | Some qn ->\n      begin match qn.next with\n      | None -> ()\n      | Some next_qn -> ____\n      end\n    end in\n  loop ____",
-          "key": "let remove_cycle (q : 'a queue) : unit =\n  let rec loop (qno : 'a qnode option) (l : 'a qnode list) : unit =\n    begin match qno with\n    | None -> ()\n    | Some qn ->\n      begin match qn.next with\n      | None -> ()\n      | Some next_qn ->\n        if contains_qn next_qn (qn :: l) then begin\n          qn.next <- None;\n          q.tail <- Some qn\n        end else loop (Some next_qn) (qn :: l)\n      end\n    end\n  in loop q.head []",
-          "keyStatus": "derived",
-          "notes": "Fits the PDF skeleton: the blanks are the body of the Some next_qn branch and the arguments after the final 'loop' (q.head []). Passing (qn :: l) catches a self-loop on the current node right away. Setting q.tail is needed so that tail ends up on the new last node. Not checked against an official solution."
+          "key": "let remove_cycle (q : 'a queue) : unit =\n  let rec loop (qno : 'a qnode option) (l : 'a qnode list) : unit =\n    begin match qno with\n    | None -> ()\n    | Some qn ->\n      begin match qn.next with\n      | None -> ()\n      | Some next_qn ->\n        if contains_qn next_qn l then\n          (qn.next <- None; q.tail <- Some qn)\n        else loop qn.next (qn :: l)\n      end\n    end\n  in loop q.head []",
+          "keyStatus": "official",
+          "notes": "Checking contains_qn next_qn (qn :: l) instead also works and catches a self-loop one step sooner. Setting q.tail is required so tail ends up on the new last node."
         }
       ]
     },
@@ -83,8 +85,8 @@
           "shape": "closures-asm",
           "prompt": "Using the notifier implementation in Appendix C, give the type of the anonymous function on lines 12 to 14 (the handle function).",
           "code": "8  let notifier (w: widget) : widget * notifier_controller =\n9    let listeners = {contents = []} in {\n10     repaint = w.repaint;\n11     handle =\n12       (fun (g: Gctx.gctx) (e: Gctx.event) ->\n13          List.iter (fun h -> h g e) listeners.contents;\n14          w.handle g e);\n15     size = w.size\n16   },{\n17     add_event_listener =\n18       fun (newl: event_listener) ->\n19         listeners.contents <- newl :: listeners.contents\n20   }",
-          "key": "Gctx.gctx -> Gctx.event -> unit (= event_listener)",
-          "keyStatus": "derived"
+          "key": "event_listener, i.e. Gctx.gctx -> Gctx.event -> unit",
+          "keyStatus": "official"
         },
         {
           "id": "2.2",
@@ -93,8 +95,8 @@
           "prompt": "When the anonymous function on lines 12 to 14 is allocated as a closure in the heap, which stack bindings must it copy? Options: w, listeners, contents, List.iter, g, e.",
           "code": "8  let notifier (w: widget) : widget * notifier_controller =\n9    let listeners = {contents = []} in {\n10     repaint = w.repaint;\n11     handle =\n12       (fun (g: Gctx.gctx) (e: Gctx.event) ->\n13          List.iter (fun h -> h g e) listeners.contents;\n14          w.handle g e);\n15     size = w.size\n16   },{\n17     add_event_listener =\n18       fun (newl: event_listener) ->\n19         listeners.contents <- newl :: listeners.contents\n20   }",
           "key": "w, listeners (not contents, not List.iter, not g/e)",
-          "keyStatus": "derived",
-          "notes": "g and e are the function's own parameters. contents is a record field, not a binding. List.iter is a top-level library function, not a local stack binding."
+          "keyStatus": "official",
+          "notes": "g and e are the function's own parameters. contents is a record field, not a binding. List.iter is a top-level library function."
         },
         {
           "id": "2.3",
@@ -103,8 +105,8 @@
           "prompt": "Implement clock init, which returns a clock widget, its notifier controller, and an int value controller for the time. Draw a circular clock face centered in a 400x400 canvas plus a hand from the center to find_endpoint of the current time. Fill in the repaint body, the canvas call and the return value.",
           "code": "(* Gctx: draw_line : gctx -> position -> position -> unit\n         draw_ellipse : gctx -> position -> int -> int -> unit  (center, x and y radii)\n   Widget: canvas : Gctx.dimension -> (Gctx.gctx -> unit) -> widget * notifier_controller\n           make_controller : 'a -> 'a value_controller *)\nlet find_endpoint (time: int) : Gctx.position = ...  (* point on radius-150 circle at (200,200) *)\n\nlet clock (init : int) :\n    widget * notifier_controller * int value_controller =\n  let time = make_controller (init mod 12) in\n  let repaint (g : Gctx.gctx) : unit =\n    let c : Gctx.position = (200,200) in (* center *)\n    let r : int = 150 in (* radius *)\n    ____\n  in\n  let clock_w, nc = ____\n  in\n  ____",
           "key": "let clock (init : int) : widget * notifier_controller * int value_controller =\n  let time = make_controller (init mod 12) in\n  let repaint (g : Gctx.gctx) : unit =\n    let c : Gctx.position = (200, 200) in\n    let r : int = 150 in\n    Gctx.draw_ellipse g c r r;\n    Gctx.draw_line g c (find_endpoint (time.get_value ()))\n  in\n  let clock_w, nc = canvas (400, 400) repaint in\n  (clock_w, nc, time)",
-          "keyStatus": "derived",
-          "notes": "The PDF text says to draw a '150 x 150 pixel ellipse', but the skeleton sets r = 150 as the radius and find_endpoint uses a radius-150 circle, so draw_ellipse g c r r (a 300-pixel-wide circle) matches the code. The 150x150 wording is ambiguous."
+          "keyStatus": "official",
+          "notes": "The prompt says '150 x 150 ellipse', but r = 150 is passed as the radius, which matches find_endpoint's radius-150 circle."
         },
         {
           "id": "2.4",
@@ -112,9 +114,9 @@
           "shape": "gui-edit",
           "prompt": "Given a clock (starting at 12) next to a label reading \"Zzzzz\", use the clock's value controller vc so that the label changes to \"Wake up\" when the time reaches 5.",
           "code": "let clock_w, nc, vc = clock 12\nlet label_w, lc = label \"Zzzzz\"\nlet top = hpair clock_w (hpair (space (10,10)) label_w)\n(* add your code here *)",
-          "key": "let clock_w, nc, vc = clock 12\nlet label_w, lc = label \"Zzzzz\"\nlet top = hpair clock_w (hpair (space (10,10)) label_w)\n;; vc.add_change_listener (fun t -> if t = 5 then lc.set_label \"Wake up\")",
-          "keyStatus": "derived",
-          "notes": "The core answer is the add_change_listener line. The first three lines are given in the PDF."
+          "key": "vc.add_change_listener (fun x ->\n  if x = 5 then lc.set_label \"Wake up\")",
+          "keyStatus": "official",
+          "notes": "The official solution writes lc.set_text, but the label_controller field in the appendix is set_label."
         }
       ]
     },
@@ -130,7 +132,7 @@
           "prompt": "What happens when this code runs? Options: s.length returns 0; s.length is skipped; NullPointerException; does not compile; none of the above.",
           "code": "String[] s = {};\nint result = s.length;",
           "key": "returns 0",
-          "keyStatus": "derived"
+          "keyStatus": "official"
         },
         {
           "id": "3.2",
@@ -139,7 +141,7 @@
           "prompt": "What does this code print? Options: true; false; null; does not compile; none of the above.",
           "code": "String s1 = \"Java\";\nString s2 = new String(\"Java\");\nSystem.out.println(s1.equals(s2));",
           "key": "prints true",
-          "keyStatus": "derived"
+          "keyStatus": "official"
         },
         {
           "id": "3.3",
@@ -148,7 +150,7 @@
           "prompt": "What does this code print when comparing two char arrays with ==? Options: true; false; null; does not compile; none of the above.",
           "code": "String s1 = \"Java\";\nchar[] a1 = s1.toCharArray();\nchar[] a2 = { 'J', 'a', 'v', 'a' };\nSystem.out.println(a1 == a2);",
           "key": "prints false",
-          "keyStatus": "derived",
+          "keyStatus": "official",
           "notes": "toCharArray returns a new array, and == on arrays compares references."
         },
         {
@@ -158,7 +160,7 @@
           "prompt": "What happens when this code runs? Options: prints \"OCaml\"; prints 2; prints null; ArrayIndexOutOfBoundsException; none of the above.",
           "code": "String[] arr = { \"Java\", \"OCaml\"};\nString last = arr[arr.length];\nSystem.out.println(last);",
           "key": "ArrayIndexOutOfBoundsException",
-          "keyStatus": "derived"
+          "keyStatus": "official"
         },
         {
           "id": "3.5",
@@ -166,9 +168,9 @@
           "shape": "java-what-happens",
           "prompt": "Which of these declarations validly create a Java array holding \"1\", \"2\" and \"3\"? Select all that apply, or none of the above.",
           "code": "A. String[] arr = {\"1\", \"2\", \"3\"};\nB. String arr = new String(new char[]{'1', '2', '3'});\nC. String[] arr = new int[]{1, 2, 3};\nD. String[] arr = { new String(\"1\"), new String(\"2\"), new String(\"3\")};\nE. None of the above.",
-          "key": "String[] arr = {\"1\",\"2\",\"3\"}; and {new String(\"1\"), new String(\"2\"), new String(\"3\")}. Not valid: new String(new char[]{...}) (a String, not an array), new int[]{1,2,3} assigned to String[]. (Options A and D.)",
-          "keyStatus": "derived",
-          "notes": "The options are unlettered checkboxes in the PDF. The letters A to E follow their order on the page. Valid: A and D. C does not compile."
+          "key": "String[] arr = {\"1\", \"2\", \"3\"}; and String[] arr = { new String(\"1\"), new String(\"2\"), new String(\"3\")}; (the first and fourth options).",
+          "keyStatus": "official",
+          "notes": "new String(new char[]{...}) makes a String, not an array. new int[]{1, 2, 3} can't be assigned to String[], so it doesn't compile."
         }
       ]
     },
@@ -183,9 +185,8 @@
           "shape": "test-writing",
           "prompt": "Fill in the expected value for a test that requests a zero-by-zero rectangle from a non-null jagged input. It should be a 0x0 2D array.",
           "code": "/* Copy a rectangular array of size h * w from the input, starting at\n   the upper left corner. Returns null if any part of the input is null,\n   h or w is negative, or if the input array does not contain enough values. */\npublic static int[][] extractRectangle(int h, int w, int[][] input);\n\n@Test\npublic void testRectangle0() {\n  int[][] input = { {1, 2}, {4, 5, 6}, {7, 8, 9, 10} };\n  int[][] expected = ____;\n  assertArrayEquals(expected, Main.extractRectangle(0, 0, input));\n}",
-          "key": "new int[0][0] (a 0x0 array)",
-          "keyStatus": "derived",
-          "notes": "An empty initializer {} works too. The PDF calls Main.extractRectangle here, but its earlier examples call Exam.extractRectangle. This inconsistency is in the PDF."
+          "key": "{} (a 0x0 array; new int[0][0] is equivalent)",
+          "keyStatus": "official"
         },
         {
           "id": "4.2",
@@ -193,19 +194,18 @@
           "shape": "test-writing",
           "prompt": "Choose an input for which extractRectangle(0, 0, input) should return null.",
           "code": "/* Copy a rectangular array of size h * w from the input, starting at\n   the upper left corner. Returns null if any part of the input is null,\n   h or w is negative, or if the input array does not contain enough values. */\npublic static int[][] extractRectangle(int h, int w, int[][] input);\n\n@Test\npublic void testRectangle1() {\n  int[][] input = ____;\n  assertNull(Main.extractRectangle(0,0,input));\n}",
-          "key": "input = null",
-          "keyStatus": "derived",
-          "notes": "Given the spec wording ('null if any part of the input is null'), an input with a null row such as {null} might also be accepted. null is the safest answer."
+          "key": "null",
+          "keyStatus": "official"
         },
         {
           "id": "4.3",
           "points": 16,
           "shape": "java-2d-array",
-          "prompt": "Implement removeRectangle(h, w, input) by filling in the blanks of the skeleton. The comment says it removes an h x w rectangle from the upper-left corner and returns null if any part of the input is null, h or w is negative, or there are not enough values. It must never throw ArrayIndexOutOfBounds or NullPointerException. The skeleton walks every row, skips the first w values of each of the first h rows, and keeps later rows whole, so the result is what is left after the rectangle is removed.",
-          "code": "/** Remove a rectangular array of size h * w from the input, starting at\n    the upper left corner. Returns null if any part of the input is null,\n    h or w is negative, or if the input array does not contain enough\n    values to remove. */\npublic static int[][] removeRectangle(int h, int w, int[][] input) {\n  if ( ____ ) {\n    return null;\n  }\n  int[][] output = ____;\n  for (int i = 0; i < ____; i++) {\n    int start = 0;\n    if (i < h) {\n      start = w;\n    }\n    if ( ____ ) {\n      return null;\n    }\n    ____\n  }\n  return output;\n}",
-          "key": "",
-          "keyStatus": "none",
-          "notes": "The PDF names this method removeRectangle, while the section introduction and 4.1/4.2 use extractRectangle, so it is a different function. The skeleton suggests the answer: the guard is input == null || h < 0 || w < 0 || input.length < h; output = new int[input.length][]; the loop runs to input.length; the inner check is input[i] == null || input[i].length < start; then copy input[i] from index start into output[i]. This is an inference only. There is no key."
+          "prompt": "Implement extractRectangle(h, w, input), which copies the h x w rectangle from the upper-left corner of a possibly jagged input. Return null if any part of the input is null, h or w is negative, or there aren't enough values. It must never throw ArrayIndexOutOfBounds or NullPointerException; return null instead.",
+          "code": "/* Copy a rectangular array of size h * w from the input, starting at\n   the upper left corner. Returns null if any part of the input is null,\n   h or w is negative, or if the input array does not contain enough\n   values. */\npublic static int[][] extractRectangle(int h, int w, int[][] input) {\n  ____\n}",
+          "key": "public static int[][] extractRectangle(int h, int w, int[][] input) {\n    if (input == null || w < 0 || h < 0 || h > input.length) {\n        return null;\n    }\n    int[][] output = new int[h][w];\n    for (int i = 0; i < h; i++) {\n        // the row must be non-null and long enough\n        if (input[i] == null || w > input[i].length) {\n            return null;\n        }\n        for (int j = 0; j < w; j++) {\n            output[i][j] = input[i][j];\n        }\n    }\n    // none of the remaining rows may be null\n    for (int i = h; i < input.length; i++) {\n        if (input[i] == null) {\n            return null;\n        }\n    }\n    return output;\n}",
+          "keyStatus": "official",
+          "notes": "The printed exam headed this part removeRectangle, with a fill-in skeleton that walks every row. The official solution ignores that skeleton and writes extractRectangle from scratch, so that is the key. Note the last loop: 'any part of the input is null' includes rows below the rectangle."
         }
       ]
     }

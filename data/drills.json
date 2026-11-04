@@ -1,0 +1,767 @@
+[
+  {
+    "id": "sum-list",
+    "title": "sum_list",
+    "group": "Lists and accumulators",
+    "level": 1,
+    "summary": "Add up every number in a list.",
+    "signature": "val sum_list : int list -> int",
+    "examples": [
+      "sum_list [1; 2; 3] = 6",
+      "sum_list [] = 0"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use any List library functions."
+    ],
+    "hint": "Carry the running total in an extra argument.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let sum_list (l : int list) : int =\n  failwith \"sum_list: fill me in\"\n",
+      "solution": "let sum_list (l : int list) : int =\n  let rec loop (l : int list) (acc : int) : int =\n    begin match l with\n    | [] -> acc\n    | x :: tl -> loop tl (acc + x)\n    end\n  in\n  loop l 0\n",
+      "nonTail": "let rec sum_list (l : int list) : int =\n  begin match l with\n  | [] -> 0\n  | x :: tl -> x + sum_list tl\n  end\n",
+      "tests": ";; run_test \"empty list sums to 0\" (fun () ->\n  sum_list [] = 0)\n;; run_test \"sum_list [1; 2; 3] = 6\" (fun () ->\n  sum_list [1; 2; 3] = 6)\n;; run_test \"negative numbers\" (fun () ->\n  sum_list [5; -2; -3] = 0)\n;; run_test \"one element\" (fun () ->\n  sum_list [42] = 42)\n;; run_test \"tail recursive: a very long list of ones\" (fun () ->\n  sum_list (tr_init stress_n (fun _ -> 1)) = stress_n)\n"
+    }
+  },
+  {
+    "id": "count-if",
+    "title": "count_if",
+    "group": "Lists and accumulators",
+    "level": 1,
+    "summary": "Count how many elements of a list satisfy a predicate.",
+    "signature": "val count_if : ('a -> bool) -> 'a list -> int",
+    "examples": [
+      "count_if (fun x -> x > 2) [1; 3; 5] = 2",
+      "count_if (fun s -> s = \"a\") [] = 0"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use any List library functions."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let count_if (p : 'a -> bool) (l : 'a list) : int =\n  failwith \"count_if: fill me in\"\n",
+      "solution": "let count_if (p : 'a -> bool) (l : 'a list) : int =\n  let rec loop (l : 'a list) (acc : int) : int =\n    begin match l with\n    | [] -> acc\n    | x :: tl -> loop tl (if p x then acc + 1 else acc)\n    end\n  in\n  loop l 0\n",
+      "nonTail": "let rec count_if (p : 'a -> bool) (l : 'a list) : int =\n  begin match l with\n  | [] -> 0\n  | x :: tl -> (if p x then 1 else 0) + count_if p tl\n  end\n",
+      "tests": ";; run_test \"empty list counts 0\" (fun () ->\n  count_if (fun _ -> true) [] = 0)\n;; run_test \"count_if (fun x -> x > 2) [1; 3; 5] = 2\" (fun () ->\n  count_if (fun x -> x > 2) [1; 3; 5] = 2)\n;; run_test \"nothing matches\" (fun () ->\n  count_if (fun x -> x < 0) [1; 2; 3] = 0)\n;; run_test \"works on strings\" (fun () ->\n  count_if (fun s -> s = \"a\") [\"a\"; \"b\"; \"a\"] = 2)\n;; run_test \"tail recursive: counts the even numbers in a very long list\" (fun () ->\n  count_if (fun x -> x mod 2 = 0) (tr_init stress_n (fun i -> i)) = stress_n / 2)\n"
+    }
+  },
+  {
+    "id": "max-list",
+    "title": "max_list",
+    "group": "Lists and accumulators",
+    "level": 1,
+    "summary": "Return the largest number in a list, or None if the list is empty.",
+    "signature": "val max_list : int list -> int option",
+    "examples": [
+      "max_list [3; 9; 2] = Some 9",
+      "max_list [] = None"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use any List library functions."
+    ],
+    "hint": "Start the accumulator at the first element, not at 0.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let max_list (l : int list) : int option =\n  failwith \"max_list: fill me in\"\n",
+      "solution": "let max_list (l : int list) : int option =\n  let rec loop (l : int list) (best : int) : int =\n    begin match l with\n    | [] -> best\n    | x :: tl -> loop tl (if x > best then x else best)\n    end\n  in\n  begin match l with\n  | [] -> None\n  | x :: tl -> Some (loop tl x)\n  end\n",
+      "nonTail": "let rec max_list (l : int list) : int option =\n  begin match l with\n  | [] -> None\n  | x :: tl ->\n    begin match max_list tl with\n    | None -> Some x\n    | Some m -> Some (if x > m then x else m)\n    end\n  end\n",
+      "tests": ";; run_test \"empty list gives None\" (fun () ->\n  max_list [] = None)\n;; run_test \"max_list [3; 9; 2] = Some 9\" (fun () ->\n  max_list [3; 9; 2] = Some 9)\n;; run_test \"all negative numbers\" (fun () ->\n  max_list [-5; -2; -9] = Some (-2))\n;; run_test \"largest at the end\" (fun () ->\n  max_list [1; 2; 3; 10] = Some 10)\n;; run_test \"tail recursive: a very long increasing list\" (fun () ->\n  max_list (tr_init stress_n (fun i -> i)) = Some (stress_n - 1))\n"
+    }
+  },
+  {
+    "id": "reverse",
+    "title": "reverse",
+    "group": "Accumulators that build results",
+    "level": 1,
+    "summary": "Reverse a list.",
+    "signature": "val reverse : 'a list -> 'a list",
+    "examples": [
+      "reverse [1; 2; 3] = [3; 2; 1]",
+      "reverse [] = []"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use any List library functions. No @ either."
+    ],
+    "hint": "Moving elements one at a time onto an accumulator reverses them for free.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let reverse (l : 'a list) : 'a list =\n  failwith \"reverse: fill me in\"\n",
+      "solution": "let reverse (l : 'a list) : 'a list =\n  let rec loop (l : 'a list) (acc : 'a list) : 'a list =\n    begin match l with\n    | [] -> acc\n    | x :: tl -> loop tl (x :: acc)\n    end\n  in\n  loop l []\n",
+      "nonTail": "let rec reverse (l : 'a list) : 'a list =\n  let rec snoc (l : 'a list) (y : 'a) : 'a list =\n    begin match l with [] -> [y] | x :: tl -> x :: snoc tl y end in\n  begin match l with\n  | [] -> []\n  | x :: tl -> snoc (reverse tl) x\n  end\n",
+      "tests": ";; run_test \"empty list\" (fun () ->\n  reverse [] = [])\n;; run_test \"reverse [1; 2; 3] = [3; 2; 1]\" (fun () ->\n  reverse [1; 2; 3] = [3; 2; 1])\n;; run_test \"one element\" (fun () ->\n  reverse [\"x\"] = [\"x\"])\n;; run_test \"reversing twice gives the original\" (fun () ->\n  reverse (reverse [4; 5; 6; 7]) = [4; 5; 6; 7])\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  reverse (tr_init stress_n (fun i -> i)) = List.rev (tr_init stress_n (fun i -> i)))\n"
+    }
+  },
+  {
+    "id": "append-tr",
+    "title": "append_tr",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Join two lists: every element of l1, in order, followed by every element of l2.",
+    "signature": "val append_tr : 'a list -> 'a list -> 'a list",
+    "examples": [
+      "append_tr [1; 2] [3; 4] = [1; 2; 3; 4]",
+      "append_tr [] [5] = [5]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use @. You may use List.rev, but no other List functions."
+    ],
+    "hint": "Reverse l1 once, then move its elements onto l2 one by one.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let append_tr (l1 : 'a list) (l2 : 'a list) : 'a list =\n  failwith \"append_tr: fill me in\"\n",
+      "solution": "let append_tr (l1 : 'a list) (l2 : 'a list) : 'a list =\n  let rec loop (rev1 : 'a list) (acc : 'a list) : 'a list =\n    begin match rev1 with\n    | [] -> acc\n    | x :: tl -> loop tl (x :: acc)\n    end\n  in\n  loop (List.rev l1) l2\n",
+      "nonTail": "let rec append_tr (l1 : 'a list) (l2 : 'a list) : 'a list =\n  begin match l1 with\n  | [] -> l2\n  | x :: tl -> x :: append_tr tl l2\n  end\n",
+      "tests": ";; run_test \"both empty\" (fun () ->\n  append_tr [] [] = [])\n;; run_test \"append_tr [1; 2] [3; 4] = [1; 2; 3; 4]\" (fun () ->\n  append_tr [1; 2] [3; 4] = [1; 2; 3; 4])\n;; run_test \"empty first list\" (fun () ->\n  append_tr [] [5] = [5])\n;; run_test \"empty second list keeps the order\" (fun () ->\n  append_tr [1; 2; 3] [] = [1; 2; 3])\n;; run_test \"tail recursive: a very long first list\" (fun () ->\n  List.length (append_tr (tr_init stress_n (fun i -> i)) [0]) = stress_n + 1)\n"
+    }
+  },
+  {
+    "id": "map-tr",
+    "title": "map_tr",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Apply f to every element of a list and return the results in the same order.",
+    "signature": "val map_tr : ('a -> 'b) -> 'a list -> 'b list",
+    "examples": [
+      "map_tr (fun x -> x * 10) [1; 2; 3] = [10; 20; 30]",
+      "map_tr string_of_int [] = []"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "The accumulator collects results backwards; reverse it once at the end.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let map_tr (f : 'a -> 'b) (l : 'a list) : 'b list =\n  failwith \"map_tr: fill me in\"\n",
+      "solution": "let map_tr (f : 'a -> 'b) (l : 'a list) : 'b list =\n  let rec loop (l : 'a list) (acc : 'b list) : 'b list =\n    begin match l with\n    | [] -> List.rev acc\n    | x :: tl -> loop tl (f x :: acc)\n    end\n  in\n  loop l []\n",
+      "nonTail": "let rec map_tr (f : 'a -> 'b) (l : 'a list) : 'b list =\n  begin match l with\n  | [] -> []\n  | x :: tl -> let y = f x in y :: map_tr f tl\n  end\n",
+      "tests": ";; run_test \"empty list\" (fun () ->\n  map_tr (fun x -> x + 1) [] = [])\n;; run_test \"keeps the order\" (fun () ->\n  map_tr (fun x -> x * 10) [1; 2; 3] = [10; 20; 30])\n;; run_test \"changes the type\" (fun () ->\n  map_tr string_of_int [7; 8] = [\"7\"; \"8\"])\n;; run_test \"calls f from left to right\" (fun () ->\n  let seen = ref [] in ignore (map_tr (fun x -> seen := x :: !seen; x) [1; 2; 3]); !seen = [3; 2; 1])\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  map_tr (fun x -> x + 1) (tr_init stress_n (fun i -> i)) = tr_init stress_n (fun i -> i + 1))\n"
+    }
+  },
+  {
+    "id": "filter-tr",
+    "title": "filter_tr",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Keep only the elements that satisfy p, in their original order.",
+    "signature": "val filter_tr : ('a -> bool) -> 'a list -> 'a list",
+    "examples": [
+      "filter_tr (fun x -> x mod 2 = 0) [1; 2; 3; 4] = [2; 4]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let filter_tr (p : 'a -> bool) (l : 'a list) : 'a list =\n  failwith \"filter_tr: fill me in\"\n",
+      "solution": "let filter_tr (p : 'a -> bool) (l : 'a list) : 'a list =\n  let rec loop (l : 'a list) (acc : 'a list) : 'a list =\n    begin match l with\n    | [] -> List.rev acc\n    | x :: tl -> loop tl (if p x then x :: acc else acc)\n    end\n  in\n  loop l []\n",
+      "nonTail": "let rec filter_tr (p : 'a -> bool) (l : 'a list) : 'a list =\n  begin match l with\n  | [] -> []\n  | x :: tl -> if p x then x :: filter_tr p tl else filter_tr p tl\n  end\n",
+      "tests": ";; run_test \"empty list\" (fun () ->\n  filter_tr (fun _ -> true) [] = [])\n;; run_test \"keeps the evens in order\" (fun () ->\n  filter_tr (fun x -> x mod 2 = 0) [1; 2; 3; 4] = [2; 4])\n;; run_test \"keeps everything\" (fun () ->\n  filter_tr (fun _ -> true) [3; 1; 2] = [3; 1; 2])\n;; run_test \"keeps nothing\" (fun () ->\n  filter_tr (fun _ -> false) [3; 1; 2] = [])\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  filter_tr (fun x -> x >= 0) (tr_init stress_n (fun i -> i)) = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "range",
+    "title": "range",
+    "group": "Accumulators that build results",
+    "level": 1,
+    "summary": "Build the list of integers from lo up to hi, inclusive. If lo > hi the list is empty.",
+    "signature": "val range : int -> int -> int list",
+    "examples": [
+      "range 2 5 = [2; 3; 4; 5]",
+      "range 3 1 = []"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Don't use any List library functions. Don't reverse anything at the end."
+    ],
+    "hint": "Count down from hi so each new number goes on the front.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let range (lo : int) (hi : int) : int list =\n  failwith \"range: fill me in\"\n",
+      "solution": "let range (lo : int) (hi : int) : int list =\n  let rec loop (i : int) (acc : int list) : int list =\n    if i < lo then acc else loop (i - 1) (i :: acc)\n  in\n  loop hi []\n",
+      "nonTail": "let rec range (lo : int) (hi : int) : int list =\n  if lo > hi then [] else lo :: range (lo + 1) hi\n",
+      "tests": ";; run_test \"range 2 5 = [2; 3; 4; 5]\" (fun () ->\n  range 2 5 = [2; 3; 4; 5])\n;; run_test \"empty when lo > hi\" (fun () ->\n  range 3 1 = [])\n;; run_test \"a single number\" (fun () ->\n  range 7 7 = [7])\n;; run_test \"negative numbers\" (fun () ->\n  range (-2) 1 = [-2; -1; 0; 1])\n;; run_test \"tail recursive: a very long range\" (fun () ->\n  range 0 (stress_n - 1) = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "zip",
+    "title": "zip",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Pair up the elements of two lists position by position. Stop when the shorter list runs out.",
+    "signature": "val zip : 'a list -> 'b list -> ('a * 'b) list",
+    "examples": [
+      "zip [1; 2; 3] [\"a\"; \"b\"] = [(1, \"a\"); (2, \"b\")]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let zip (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =\n  failwith \"zip: fill me in\"\n",
+      "solution": "let zip (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =\n  let rec loop (l1 : 'a list) (l2 : 'b list) (acc : ('a * 'b) list) : ('a * 'b) list =\n    begin match l1, l2 with\n    | x :: t1, y :: t2 -> loop t1 t2 ((x, y) :: acc)\n    | _ -> List.rev acc\n    end\n  in\n  loop l1 l2 []\n",
+      "nonTail": "let rec zip (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =\n  begin match l1, l2 with\n  | x :: t1, y :: t2 -> (x, y) :: zip t1 t2\n  | _ -> []\n  end\n",
+      "tests": ";; run_test \"both empty\" (fun () ->\n  zip [] [] = ([] : (int * int) list))\n;; run_test \"same length keeps the order\" (fun () ->\n  zip [1; 2; 3] [\"a\"; \"b\"; \"c\"] = [(1, \"a\"); (2, \"b\"); (3, \"c\")])\n;; run_test \"stops at the shorter second list\" (fun () ->\n  zip [1; 2; 3] [\"a\"; \"b\"] = [(1, \"a\"); (2, \"b\")])\n;; run_test \"stops at the shorter first list\" (fun () ->\n  zip [1] [true; false] = [(1, true)])\n;; run_test \"tail recursive: two very long lists\" (fun () ->\n  List.length (zip (tr_init stress_n (fun i -> i)) (tr_init stress_n (fun i -> i))) = stress_n)\n"
+    }
+  },
+  {
+    "id": "split-parity",
+    "title": "split_parity",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Split a list into its even numbers and its odd numbers, keeping each group in its original order.",
+    "signature": "val split_parity : int list -> int list * int list",
+    "examples": [
+      "split_parity [1; 2; 3; 4; 5] = ([2; 4], [1; 3; 5])"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "Use two accumulators, one per group.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let split_parity (l : int list) : int list * int list =\n  failwith \"split_parity: fill me in\"\n",
+      "solution": "let split_parity (l : int list) : int list * int list =\n  let rec loop (l : int list) (evens : int list) (odds : int list) : int list * int list =\n    begin match l with\n    | [] -> (List.rev evens, List.rev odds)\n    | x :: tl -> if x mod 2 = 0 then loop tl (x :: evens) odds else loop tl evens (x :: odds)\n    end\n  in\n  loop l [] []\n",
+      "nonTail": "let rec split_parity (l : int list) : int list * int list =\n  begin match l with\n  | [] -> ([], [])\n  | x :: tl ->\n    let (evens, odds) = split_parity tl in\n    if x mod 2 = 0 then (x :: evens, odds) else (evens, x :: odds)\n  end\n",
+      "tests": ";; run_test \"empty list\" (fun () ->\n  split_parity [] = ([], []))\n;; run_test \"split_parity [1; 2; 3; 4; 5] = ([2; 4], [1; 3; 5])\" (fun () ->\n  split_parity [1; 2; 3; 4; 5] = ([2; 4], [1; 3; 5]))\n;; run_test \"all even\" (fun () ->\n  split_parity [8; 6; 4] = ([8; 6; 4], []))\n;; run_test \"negative odd numbers\" (fun () ->\n  split_parity [-3; 0] = ([0], [-3]))\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  let (e, o) = split_parity (tr_init stress_n (fun i -> i)) in List.length e = stress_n / 2 && List.length o = stress_n / 2)\n"
+    }
+  },
+  {
+    "id": "flatten",
+    "title": "flatten",
+    "group": "Accumulators that build results",
+    "level": 2,
+    "summary": "Join a list of lists into one list, keeping every element in order.",
+    "signature": "val flatten : 'a list list -> 'a list",
+    "examples": [
+      "flatten [[1; 2]; []; [3]] = [1; 2; 3]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "Walk the current inner list and the outer list with the same loop.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let flatten (ls : 'a list list) : 'a list =\n  failwith \"flatten: fill me in\"\n",
+      "solution": "let flatten (ls : 'a list list) : 'a list =\n  let rec loop (ls : 'a list list) (cur : 'a list) (acc : 'a list) : 'a list =\n    begin match cur with\n    | x :: tl -> loop ls tl (x :: acc)\n    | [] ->\n      begin match ls with\n      | [] -> List.rev acc\n      | l :: rest -> loop rest l acc\n      end\n    end\n  in\n  loop ls [] []\n",
+      "nonTail": "let rec flatten (ls : 'a list list) : 'a list =\n  let rec app (l : 'a list) (rest : 'a list) : 'a list =\n    begin match l with [] -> rest | x :: tl -> x :: app tl rest end in\n  begin match ls with\n  | [] -> []\n  | l :: rest -> app l (flatten rest)\n  end\n",
+      "tests": ";; run_test \"no lists\" (fun () ->\n  flatten ([] : int list list) = [])\n;; run_test \"flatten [[1; 2]; []; [3]] = [1; 2; 3]\" (fun () ->\n  flatten [[1; 2]; []; [3]] = [1; 2; 3])\n;; run_test \"only empty lists\" (fun () ->\n  flatten [[]; []] = ([] : int list))\n;; run_test \"keeps the order inside and across lists\" (fun () ->\n  flatten [[\"a\"]; [\"b\"; \"c\"]; [\"d\"]] = [\"a\"; \"b\"; \"c\"; \"d\"])\n;; run_test \"tail recursive: very many short lists\" (fun () ->\n  flatten (tr_init stress_n (fun i -> [i])) = tr_init stress_n (fun i -> i))\n;; run_test \"tail recursive: one very long inner list\" (fun () ->\n  flatten [[]; tr_init stress_n (fun i -> i)] = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "merge-sorted",
+    "title": "merge",
+    "group": "Accumulators that build results",
+    "level": 3,
+    "summary": "Merge two lists that are each sorted in increasing order into one sorted list.",
+    "signature": "val merge : int list -> int list -> int list",
+    "examples": [
+      "merge [1; 4; 6] [2; 3; 7] = [1; 2; 3; 4; 6; 7]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "When one list runs out, the rest of the other still has to go onto the accumulator.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let merge (l1 : int list) (l2 : int list) : int list =\n  failwith \"merge: fill me in\"\n",
+      "solution": "let merge (l1 : int list) (l2 : int list) : int list =\n  let rec loop (l1 : int list) (l2 : int list) (acc : int list) : int list =\n    begin match l1, l2 with\n    | [], rest | rest, [] ->\n      let rec finish (r : int list) (acc : int list) : int list =\n        begin match r with [] -> List.rev acc | x :: tl -> finish tl (x :: acc) end in\n      finish rest acc\n    | x :: t1, y :: t2 ->\n      if x <= y then loop t1 l2 (x :: acc) else loop l1 t2 (y :: acc)\n    end\n  in\n  loop l1 l2 []\n",
+      "nonTail": "let rec merge (l1 : int list) (l2 : int list) : int list =\n  begin match l1, l2 with\n  | [], rest | rest, [] -> rest\n  | x :: t1, y :: t2 -> if x <= y then x :: merge t1 l2 else y :: merge l1 t2\n  end\n",
+      "tests": ";; run_test \"both empty\" (fun () ->\n  merge [] [] = [])\n;; run_test \"merge [1; 4; 6] [2; 3; 7] = [1; 2; 3; 4; 6; 7]\" (fun () ->\n  merge [1; 4; 6] [2; 3; 7] = [1; 2; 3; 4; 6; 7])\n;; run_test \"one side empty\" (fun () ->\n  merge [] [2; 5] = [2; 5] && merge [2; 5] [] = [2; 5])\n;; run_test \"keeps duplicates\" (fun () ->\n  merge [1; 2; 2] [2; 3] = [1; 2; 2; 2; 3])\n;; run_test \"everything in one list comes first\" (fun () ->\n  merge [1; 2] [8; 9] = [1; 2; 8; 9])\n;; run_test \"tail recursive: two very long interleaved lists\" (fun () ->\n  merge (tr_init (stress_n / 2) (fun i -> 2 * i)) (tr_init (stress_n / 2) (fun i -> 2 * i + 1)) = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "fold-right-tr",
+    "title": "fold_right_tr",
+    "group": "Trickier recursion",
+    "level": 3,
+    "summary": "Write fold_right without growing the stack: fold_right_tr f l base = f x1 (f x2 (... (f xn base))).",
+    "signature": "val fold_right_tr : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b",
+    "examples": [
+      "fold_right_tr (fun x acc -> x :: acc) [1; 2; 3] [] = [1; 2; 3]",
+      "fold_right_tr (fun x acc -> acc - x) [1; 2] 10 = 7"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "Reversing the list first lets you apply f in the right order with an accumulator.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let fold_right_tr (f : 'a -> 'b -> 'b) (l : 'a list) (base : 'b) : 'b =\n  failwith \"fold_right_tr: fill me in\"\n",
+      "solution": "let fold_right_tr (f : 'a -> 'b -> 'b) (l : 'a list) (base : 'b) : 'b =\n  let rec loop (rev : 'a list) (acc : 'b) : 'b =\n    begin match rev with\n    | [] -> acc\n    | x :: tl -> loop tl (f x acc)\n    end\n  in\n  loop (List.rev l) base\n",
+      "nonTail": "let rec fold_right_tr (f : 'a -> 'b -> 'b) (l : 'a list) (base : 'b) : 'b =\n  begin match l with\n  | [] -> base\n  | x :: tl -> f x (fold_right_tr f tl base)\n  end\n",
+      "tests": ";; run_test \"empty list returns base\" (fun () ->\n  fold_right_tr (fun x acc -> x + acc) [] 5 = 5)\n;; run_test \"rebuilds the list in order\" (fun () ->\n  fold_right_tr (fun x acc -> x :: acc) [1; 2; 3] [] = [1; 2; 3])\n;; run_test \"applies f to the last element first\" (fun () ->\n  fold_right_tr (fun x acc -> acc ^ x) [\"a\"; \"b\"; \"c\"] \"\" = \"cba\")\n;; run_test \"non-commutative f\" (fun () ->\n  fold_right_tr (fun x acc -> acc - x) [1; 2] 10 = 7)\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  fold_right_tr (fun x acc -> x :: acc) (tr_init stress_n (fun i -> i)) [] = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "run-length",
+    "title": "encode",
+    "group": "Trickier recursion",
+    "level": 3,
+    "summary": "Run-length encode a list: replace each run of equal neighbours with (value, how many times it repeats).",
+    "signature": "val encode : 'a list -> ('a * int) list",
+    "examples": [
+      "encode [\"a\"; \"a\"; \"b\"; \"a\"] = [(\"a\", 2); (\"b\", 1); (\"a\", 1)]",
+      "encode [] = []"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "hint": "Keep the current value and its count in the accumulator alongside the finished runs.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let encode (l : 'a list) : ('a * int) list =\n  failwith \"encode: fill me in\"\n",
+      "solution": "let encode (l : 'a list) : ('a * int) list =\n  let rec loop (l : 'a list) (cur : 'a) (n : int) (acc : ('a * int) list) : ('a * int) list =\n    begin match l with\n    | [] -> List.rev ((cur, n) :: acc)\n    | x :: tl -> if x = cur then loop tl cur (n + 1) acc else loop tl x 1 ((cur, n) :: acc)\n    end\n  in\n  begin match l with\n  | [] -> []\n  | x :: tl -> loop tl x 1 []\n  end\n",
+      "nonTail": "let rec encode (l : 'a list) : ('a * int) list =\n  begin match l with\n  | [] -> []\n  | x :: tl ->\n    begin match encode tl with\n    | (y, n) :: rest when y = x -> (x, n + 1) :: rest\n    | rest -> (x, 1) :: rest\n    end\n  end\n",
+      "tests": ";; run_test \"empty list\" (fun () ->\n  encode ([] : int list) = [])\n;; run_test \"runs of letters\" (fun () ->\n  encode [\"a\"; \"a\"; \"b\"; \"a\"] = [(\"a\", 2); (\"b\", 1); (\"a\", 1)])\n;; run_test \"one long run\" (fun () ->\n  encode [7; 7; 7] = [(7, 3)])\n;; run_test \"no repeats\" (fun () ->\n  encode [1; 2; 3] = [(1, 1); (2, 1); (3, 1)])\n;; run_test \"tail recursive: a very long list of pairs\" (fun () ->\n  encode (tr_init stress_n (fun i -> i / 2)) = tr_init (stress_n / 2) (fun i -> (i, 2)))\n"
+    }
+  },
+  {
+    "id": "fib",
+    "title": "fib",
+    "group": "Trickier recursion",
+    "level": 2,
+    "summary": "Compute the nth Fibonacci number (fib 0 = 0, fib 1 = 1) in linear time.",
+    "signature": "val fib : int -> int",
+    "examples": [
+      "fib 0 = 0",
+      "fib 10 = 55"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Must take linear time: no double recursion."
+    ],
+    "hint": "Carry two consecutive Fibonacci numbers in the accumulators.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let fib (n : int) : int =\n  failwith \"fib: fill me in\"\n",
+      "solution": "let fib (n : int) : int =\n  let rec loop (i : int) (a : int) (b : int) : int =\n    if i = 0 then a else loop (i - 1) b (a + b)\n  in\n  loop n 0 1\n",
+      "nonTail": "let fib (n : int) : int =\n  let rec pair (n : int) : int * int =\n    if n = 0 then (0, 1)\n    else let (a, b) = pair (n - 1) in (b, a + b)\n  in\n  fst (pair n)\n",
+      "tests": ";; run_test \"fib 0 = 0\" (fun () ->\n  fib 0 = 0)\n;; run_test \"fib 1 = 1\" (fun () ->\n  fib 1 = 1)\n;; run_test \"fib 10 = 55\" (fun () ->\n  fib 10 = 55)\n;; run_test \"fib 30 = 832040\" (fun () ->\n  fib 30 = 832040)\n;; run_test \"tail recursive: fib of a very large n (the number overflows; only the stack matters)\" (fun () ->\n  let a = ref 0 and b = ref 1 in for _ = 1 to stress_n do let c = !a + !b in a := !b; b := c done; fib stress_n = !a)\n"
+    }
+  },
+  {
+    "id": "apply-n",
+    "title": "apply_n",
+    "group": "Trickier recursion",
+    "level": 1,
+    "summary": "Apply f to x, n times in a row. apply_n f 0 x = x.",
+    "signature": "val apply_n : ('a -> 'a) -> int -> 'a -> 'a",
+    "examples": [
+      "apply_n (fun x -> x * 2) 3 1 = 8",
+      "apply_n (fun s -> s ^ \"!\") 2 \"hi\" = \"hi!!\""
+    ],
+    "rules": [
+      "Must be tail recursive."
+    ],
+    "hint": "f x can be computed before the recursive call instead of after.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "",
+      "starter": "let apply_n (f : 'a -> 'a) (n : int) (x : 'a) : 'a =\n  failwith \"apply_n: fill me in\"\n",
+      "solution": "let rec apply_n (f : 'a -> 'a) (n : int) (x : 'a) : 'a =\n  if n <= 0 then x else apply_n f (n - 1) (f x)\n",
+      "nonTail": "let rec apply_n (f : 'a -> 'a) (n : int) (x : 'a) : 'a =\n  if n <= 0 then x else f (apply_n f (n - 1) x)\n",
+      "tests": ";; run_test \"zero times returns x\" (fun () ->\n  apply_n (fun x -> x + 1) 0 5 = 5)\n;; run_test \"apply_n (fun x -> x * 2) 3 1 = 8\" (fun () ->\n  apply_n (fun x -> x * 2) 3 1 = 8)\n;; run_test \"works on strings\" (fun () ->\n  apply_n (fun s -> s ^ \"!\") 2 \"hi\" = \"hi!!\")\n;; run_test \"order matters for lists\" (fun () ->\n  apply_n (fun l -> List.length l :: l) 3 [] = [2; 1; 0])\n;; run_test \"tail recursive: a very large n\" (fun () ->\n  apply_n (fun x -> x + 1) stress_n 0 = stress_n)\n"
+    }
+  },
+  {
+    "id": "tree-size",
+    "title": "size",
+    "group": "Trickier recursion",
+    "level": 2,
+    "summary": "Count the nodes of a binary tree without growing the stack, using a list of trees still to visit (a worklist).",
+    "signature": "type 'a tree = Empty | Node of 'a tree * 'a * 'a tree\nval size : 'a tree -> int",
+    "examples": [
+      "size Empty = 0",
+      "size (Node (Empty, 1, Node (Empty, 2, Empty))) = 2"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Very deep, one-sided trees must work too."
+    ],
+    "hint": "A tree list replaces the call stack: pop one, push its children.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a tree = Empty | Node of 'a tree * 'a * 'a tree\n\n(* Test helpers: very deep, one-sided trees, built tail recursively. *)\n(* left_chain n: values 1..n, each node's left child holds the previous value. *)\nlet left_chain (n : int) : int tree =\n  let rec go (i : int) (acc : int tree) : int tree =\n    if i > n then acc else go (i + 1) (Node (acc, i, Empty)) in\n  go 1 Empty\n\n(* right_chain n: values 1..n, each node's right child holds the next value. *)\nlet right_chain (n : int) : int tree =\n  let rec go (i : int) (acc : int tree) : int tree =\n    if i < 1 then acc else go (i - 1) (Node (Empty, i, acc)) in\n  go n Empty\n\nlet sample : int tree =\n  Node (Node (Node (Empty, 1, Empty), 2, Node (Empty, 3, Empty)), 4, Node (Empty, 5, Node (Empty, 6, Empty)))\n",
+      "starter": "let size (t : 'a tree) : int =\n  failwith \"size: fill me in\"\n",
+      "solution": "let size (t : 'a tree) : int =\n  let rec loop (todo : 'a tree list) (acc : int) : int =\n    begin match todo with\n    | [] -> acc\n    | Empty :: rest -> loop rest acc\n    | Node (l, _, r) :: rest -> loop (l :: r :: rest) (acc + 1)\n    end\n  in\n  loop [t] 0\n",
+      "nonTail": "let rec size (t : 'a tree) : int =\n  begin match t with\n  | Empty -> 0\n  | Node (l, _, r) -> size l + 1 + size r\n  end\n",
+      "tests": ";; run_test \"empty tree\" (fun () ->\n  size Empty = 0)\n;; run_test \"one node\" (fun () ->\n  size (Node (Empty, \"x\", Empty)) = 1)\n;; run_test \"the sample tree has 6 nodes\" (fun () ->\n  size sample = 6)\n;; run_test \"tail recursive: a very deep tree leaning left\" (fun () ->\n  size (left_chain stress_n) = stress_n)\n;; run_test \"tail recursive: a very deep tree leaning right\" (fun () ->\n  size (right_chain stress_n) = stress_n)\n"
+    }
+  },
+  {
+    "id": "tree-inorder",
+    "title": "inorder",
+    "group": "Trickier recursion",
+    "level": 3,
+    "summary": "List the values of a binary tree in order (left subtree, then the node, then the right subtree), using an explicit stack instead of recursion on both children.",
+    "signature": "type 'a tree = Empty | Node of 'a tree * 'a * 'a tree\nval inorder : 'a tree -> 'a list",
+    "examples": [
+      "inorder (Node (Node (Empty, 1, Empty), 2, Node (Empty, 3, Empty))) = [1; 2; 3]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "You may use List.rev, but no other List functions.",
+      "Very deep, one-sided trees must work too."
+    ],
+    "hint": "Walk left as far as you can, remembering each node you pass on a stack.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a tree = Empty | Node of 'a tree * 'a * 'a tree\n\n(* Test helpers: very deep, one-sided trees, built tail recursively. *)\n(* left_chain n: values 1..n, each node's left child holds the previous value. *)\nlet left_chain (n : int) : int tree =\n  let rec go (i : int) (acc : int tree) : int tree =\n    if i > n then acc else go (i + 1) (Node (acc, i, Empty)) in\n  go 1 Empty\n\n(* right_chain n: values 1..n, each node's right child holds the next value. *)\nlet right_chain (n : int) : int tree =\n  let rec go (i : int) (acc : int tree) : int tree =\n    if i < 1 then acc else go (i - 1) (Node (Empty, i, acc)) in\n  go n Empty\n\nlet sample : int tree =\n  Node (Node (Node (Empty, 1, Empty), 2, Node (Empty, 3, Empty)), 4, Node (Empty, 5, Node (Empty, 6, Empty)))\n",
+      "starter": "let inorder (t : 'a tree) : 'a list =\n  failwith \"inorder: fill me in\"\n",
+      "solution": "let inorder (t : 'a tree) : 'a list =\n  (* stack holds nodes whose left side is done but whose value isn't listed yet *)\n  let rec loop (cur : 'a tree) (stack : ('a * 'a tree) list) (acc : 'a list) : 'a list =\n    begin match cur with\n    | Node (l, v, r) -> loop l ((v, r) :: stack) acc\n    | Empty ->\n      begin match stack with\n      | [] -> List.rev acc\n      | (v, r) :: rest -> loop r rest (v :: acc)\n      end\n    end\n  in\n  loop t [] []\n",
+      "nonTail": "let rec inorder (t : 'a tree) : 'a list =\n  let rec app (l : 'a list) (rest : 'a list) : 'a list =\n    begin match l with [] -> rest | x :: tl -> x :: app tl rest end in\n  begin match t with\n  | Empty -> []\n  | Node (l, v, r) -> app (inorder l) (v :: inorder r)\n  end\n",
+      "tests": ";; run_test \"empty tree\" (fun () ->\n  inorder Empty = ([] : int list))\n;; run_test \"one node\" (fun () ->\n  inorder (Node (Empty, 5, Empty)) = [5])\n;; run_test \"the sample tree lists 1 to 6\" (fun () ->\n  inorder sample = [1; 2; 3; 4; 5; 6])\n;; run_test \"a left-leaning tree\" (fun () ->\n  inorder (left_chain 4) = [1; 2; 3; 4])\n;; run_test \"tail recursive: a very deep tree leaning left\" (fun () ->\n  inorder (left_chain stress_n) = tr_init stress_n (fun i -> i + 1))\n;; run_test \"tail recursive: a very deep tree leaning right\" (fun () ->\n  inorder (right_chain stress_n) = tr_init stress_n (fun i -> i + 1))\n"
+    }
+  },
+  {
+    "id": "q-length",
+    "title": "length",
+    "group": "Queues",
+    "level": 1,
+    "summary": "Count the elements of a queue by following next pointers from the head.",
+    "signature": "val length : 'a queue -> int",
+    "examples": [
+      "length (from 1, 2, 3) = 3",
+      "length (create ()) = 0"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let length (q : 'a queue) : int =\n  failwith \"length: fill me in\"\n",
+      "solution": "let length (q : 'a queue) : int =\n  let rec loop (no : 'a qnode option) (acc : int) : int =\n    begin match no with\n    | None -> acc\n    | Some n -> loop n.next (acc + 1)\n    end\n  in\n  loop q.head 0\n",
+      "nonTail": "let length (q : 'a queue) : int =\n  let rec loop (no : 'a qnode option) : int =\n    begin match no with\n    | None -> 0\n    | Some n -> 1 + loop n.next\n    end\n  in\n  loop q.head\n",
+      "tests": ";; run_test \"empty queue\" (fun () ->\n  length (create ()) = 0)\n;; run_test \"three elements\" (fun () ->\n  length (q_of_list [1; 2; 3]) = 3)\n;; run_test \"one element\" (fun () ->\n  length (q_of_list [\"a\"]) = 1)\n;; run_test \"does not change the queue\" (fun () ->\n  let q = q_of_list [4; 5] in ignore (length q); q_contents q = [4; 5] && q_valid q)\n;; run_test \"tail recursive: a very long queue\" (fun () ->\n  length (q_of_list (tr_init stress_n (fun i -> i))) = stress_n)\n"
+    }
+  },
+  {
+    "id": "q-contains",
+    "title": "contains",
+    "group": "Queues",
+    "level": 1,
+    "summary": "Return true if some element of the queue equals x. Stop as soon as you find it.",
+    "signature": "val contains : 'a -> 'a queue -> bool",
+    "examples": [
+      "contains 2 (from 1, 2, 3) = true",
+      "contains 9 (from 1, 2, 3) = false"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers.",
+      "Exit early: return as soon as you find x."
+    ],
+    "hint": "In b1 || b2, only b2 is in tail position. Which side should the recursive call go on?",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let contains (x : 'a) (q : 'a queue) : bool =\n  failwith \"contains: fill me in\"\n",
+      "solution": "let contains (x : 'a) (q : 'a queue) : bool =\n  let rec loop (no : 'a qnode option) : bool =\n    begin match no with\n    | None -> false\n    | Some n -> n.v = x || loop n.next\n    end\n  in\n  loop q.head\n",
+      "nonTail": "let contains (x : 'a) (q : 'a queue) : bool =\n  let rec loop (no : 'a qnode option) : bool =\n    begin match no with\n    | None -> false\n    | Some n -> loop n.next || n.v = x\n    end\n  in\n  loop q.head\n",
+      "tests": ";; run_test \"empty queue\" (fun () ->\n  not (contains 1 (create ())))\n;; run_test \"finds an element in the middle\" (fun () ->\n  contains 2 (q_of_list [1; 2; 3]))\n;; run_test \"finds the head and the tail\" (fun () ->\n  let q = q_of_list [1; 2; 3] in contains 1 q && contains 3 q)\n;; run_test \"missing element\" (fun () ->\n  not (contains 9 (q_of_list [1; 2; 3])))\n;; run_test \"tail recursive: searching a very long queue\" (fun () ->\n  let q = q_of_list (tr_init stress_n (fun i -> i)) in contains (stress_n - 1) q && not (contains (-1) q))\n"
+    }
+  },
+  {
+    "id": "q-index-of",
+    "title": "index_of",
+    "group": "Queues",
+    "level": 2,
+    "summary": "Return Some i where i is the position (counting from 0 at the head) of the first element equal to x, or None if x is not in the queue.",
+    "signature": "val index_of : 'a -> 'a queue -> int option",
+    "examples": [
+      "index_of \"c\" (from \"a\", \"b\", \"c\") = Some 2",
+      "index_of \"z\" (from \"a\", \"b\") = None"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers.",
+      "Exit early: stop at the first match."
+    ],
+    "hint": "Count positions on the way down instead of adding 1 on the way back up.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let index_of (x : 'a) (q : 'a queue) : int option =\n  failwith \"index_of: fill me in\"\n",
+      "solution": "let index_of (x : 'a) (q : 'a queue) : int option =\n  let rec loop (no : 'a qnode option) (i : int) : int option =\n    begin match no with\n    | None -> None\n    | Some n -> if n.v = x then Some i else loop n.next (i + 1)\n    end\n  in\n  loop q.head 0\n",
+      "nonTail": "let index_of (x : 'a) (q : 'a queue) : int option =\n  let rec loop (no : 'a qnode option) : int option =\n    begin match no with\n    | None -> None\n    | Some n ->\n      if n.v = x then Some 0\n      else begin match loop n.next with\n        | None -> None\n        | Some i -> Some (i + 1)\n      end\n    end\n  in\n  loop q.head\n",
+      "tests": ";; run_test \"empty queue\" (fun () ->\n  index_of 1 (create ()) = None)\n;; run_test \"the head is at 0\" (fun () ->\n  index_of \"a\" (q_of_list [\"a\"; \"b\"; \"c\"]) = Some 0)\n;; run_test \"the last element\" (fun () ->\n  index_of \"c\" (q_of_list [\"a\"; \"b\"; \"c\"]) = Some 2)\n;; run_test \"the first of several matches\" (fun () ->\n  index_of 7 (q_of_list [1; 7; 2; 7]) = Some 1)\n;; run_test \"missing element\" (fun () ->\n  index_of \"z\" (q_of_list [\"a\"; \"b\"]) = None)\n;; run_test \"tail recursive: the last element of a very long queue\" (fun () ->\n  index_of (stress_n - 1) (q_of_list (tr_init stress_n (fun i -> i))) = Some (stress_n - 1))\n"
+    }
+  },
+  {
+    "id": "q-to-list",
+    "title": "to_list",
+    "group": "Queues",
+    "level": 2,
+    "summary": "Return the elements of a queue as a list, head first.",
+    "signature": "val to_list : 'a queue -> 'a list",
+    "examples": [
+      "to_list (from 1, 2, 3) = [1; 2; 3]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers.",
+      "You may use List.rev, but no other List functions."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let to_list (q : 'a queue) : 'a list =\n  failwith \"to_list: fill me in\"\n",
+      "solution": "let to_list (q : 'a queue) : 'a list =\n  let rec loop (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with\n    | None -> List.rev acc\n    | Some n -> loop n.next (n.v :: acc)\n    end\n  in\n  loop q.head []\n",
+      "nonTail": "let to_list (q : 'a queue) : 'a list =\n  let rec loop (no : 'a qnode option) : 'a list =\n    begin match no with\n    | None -> []\n    | Some n -> n.v :: loop n.next\n    end\n  in\n  loop q.head\n",
+      "tests": ";; run_test \"empty queue\" (fun () ->\n  to_list (create ()) = ([] : int list))\n;; run_test \"head comes first\" (fun () ->\n  to_list (q_of_list [1; 2; 3]) = [1; 2; 3])\n;; run_test \"one element\" (fun () ->\n  to_list (q_of_list [\"x\"]) = [\"x\"])\n;; run_test \"does not change the queue\" (fun () ->\n  let q = q_of_list [1; 2] in ignore (to_list q); q_valid q && q_contents q = [1; 2])\n;; run_test \"tail recursive: a very long queue\" (fun () ->\n  to_list (q_of_list (tr_init stress_n (fun i -> i))) = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "q-from-list",
+    "title": "from_list",
+    "group": "Queues",
+    "level": 2,
+    "summary": "Build a new queue holding the elements of a list, with the first element at the head.",
+    "signature": "val from_list : 'a list -> 'a queue",
+    "examples": [
+      "to_list (from_list [1; 2; 3]) = [1; 2; 3]",
+      "from_list [] is an empty queue"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers."
+    ],
+    "hint": "Make the queue first, then enq each element as you walk the list.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let from_list (l : 'a list) : 'a queue =\n  failwith \"from_list: fill me in\"\n",
+      "solution": "let from_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec loop (l : 'a list) : unit =\n    begin match l with\n    | [] -> ()\n    | x :: tl -> enq x q; loop tl\n    end\n  in\n  loop l;\n  q\n",
+      "nonTail": "let rec from_list (l : 'a list) : 'a queue =\n  begin match l with\n  | [] -> create ()\n  | x :: tl ->\n    let q = from_list tl in\n    let n = { v = x; next = q.head } in\n    (match q.tail with None -> q.tail <- Some n | Some _ -> ());\n    q.head <- Some n;\n    q\n  end\n",
+      "tests": ";; run_test \"empty list gives an empty queue\" (fun () ->\n  let q = from_list [] in q.head = None && q.tail = None)\n;; run_test \"first element at the head\" (fun () ->\n  q_contents (from_list [1; 2; 3]) = [1; 2; 3])\n;; run_test \"one element: head and tail are the same node\" (fun () ->\n  let q = from_list [\"x\"] in (match q.head, q.tail with Some h, Some t -> h == t | _ -> false))\n;; run_test \"the result is a valid queue\" (fun () ->\n  q_valid (from_list [5; 6; 7; 8]))\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  let q = from_list (tr_init stress_n (fun i -> i)) in q_valid q && q_contents q = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "q-remove-all",
+    "title": "remove_all",
+    "group": "Queues",
+    "level": 3,
+    "summary": "Remove every node whose value equals x from the queue, in place. The remaining nodes must be the same nodes as before, still in order, and the queue must stay valid.",
+    "signature": "val remove_all : 'a -> 'a queue -> unit",
+    "examples": [
+      "after remove_all 1 on 1, 2, 1, 3 the queue is 2, 3"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The queue types are the ones from Homework 4. Use only create and enq, plus your own helpers.",
+      "Don't allocate new nodes: relink the existing ones.",
+      "Remember to fix head and tail."
+    ],
+    "hint": "Carry the last node you kept so you can link around the removed ones.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a qnode = { v : 'a; mutable next : 'a qnode option }\ntype 'a queue = { mutable head : 'a qnode option; mutable tail : 'a qnode option }\n\nlet create () : 'a queue = { head = None; tail = None }\n\nlet enq (x : 'a) (q : 'a queue) : unit =\n  let newnode = { v = x; next = None } in\n  begin match q.tail with\n  | None -> q.head <- Some newnode; q.tail <- Some newnode\n  | Some n -> n.next <- Some newnode; q.tail <- Some newnode\n  end\n\n(* Test helpers (tail recursive). *)\nlet q_of_list (l : 'a list) : 'a queue =\n  let q = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> enq x q; go tl end in\n  go l; q\n\nlet q_contents (q : 'a queue) : 'a list =\n  let rec go (no : 'a qnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go q.head []\n\nlet q_valid (q : 'a queue) : bool =\n  begin match q.head, q.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    let rec reach (n : 'a qnode) (steps : int) : bool =\n      if n == t then (match n.next with None -> true | Some _ -> false)\n      else if steps > 100_000_000 then false\n      else begin match n.next with None -> false | Some m -> reach m (steps + 1) end in\n    reach h 0\n  | _ -> false\n  end\n",
+      "starter": "let remove_all (x : 'a) (q : 'a queue) : unit =\n  failwith \"remove_all: fill me in\"\n",
+      "solution": "let remove_all (x : 'a) (q : 'a queue) : unit =\n  (* prev is the last node kept so far *)\n  let rec loop (prev : 'a qnode option) (cur : 'a qnode option) : unit =\n    begin match cur with\n    | None -> q.tail <- prev\n    | Some n ->\n      if n.v = x then begin\n        (match prev with None -> q.head <- n.next | Some p -> p.next <- n.next);\n        loop prev n.next\n      end\n      else loop cur n.next\n    end\n  in\n  loop None q.head\n",
+      "nonTail": "let remove_all (x : 'a) (q : 'a queue) : unit =\n  let rec go (cur : 'a qnode option) : 'a qnode option =\n    begin match cur with\n    | None -> None\n    | Some n ->\n      let rest = go n.next in\n      if n.v = x then rest else (n.next <- rest; Some n)\n    end\n  in\n  q.head <- go q.head;\n  let rec last (no : 'a qnode option) (seen : 'a qnode option) : 'a qnode option =\n    begin match no with None -> seen | Some n -> last n.next no end in\n  q.tail <- last q.head None\n",
+      "tests": ";; run_test \"removes from the middle and keeps order\" (fun () ->\n  let q = q_of_list [1; 2; 1; 3] in remove_all 1 q; q_contents q = [2; 3] && q_valid q)\n;; run_test \"removing everything leaves an empty queue\" (fun () ->\n  let q = q_of_list [4; 4; 4] in remove_all 4 q; q.head = None && q.tail = None)\n;; run_test \"removing the tail fixes the tail\" (fun () ->\n  let q = q_of_list [1; 2; 3] in remove_all 3 q; q_contents q = [1; 2] && q_valid q)\n;; run_test \"missing value changes nothing\" (fun () ->\n  let q = q_of_list [1; 2] in remove_all 9 q; q_contents q = [1; 2] && q_valid q)\n;; run_test \"keeps the same nodes\" (fun () ->\n  let q = q_of_list [1; 2; 1; 3] in let n2 = (match q.head with Some h -> (match h.next with Some m -> m | None -> h) | None -> failwith \"empty\") in remove_all 1 q; (match q.head with Some h -> h == n2 | None -> false))\n;; run_test \"tail recursive: a very long queue\" (fun () ->\n  let q = q_of_list (tr_init stress_n (fun i -> i mod 2)) in remove_all 0 q; q_valid q && List.length (q_contents q) = stress_n / 2)\n"
+    }
+  },
+  {
+    "id": "dq-length-back",
+    "title": "length_back",
+    "group": "Deques",
+    "level": 1,
+    "summary": "Count the elements of a deque by starting at the tail and following prev pointers.",
+    "signature": "val length_back : 'a deque -> int",
+    "examples": [
+      "length_back (from 1, 2, 3) = 3"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The deque types are the ones from Homework 4.",
+      "Walk from the tail using prev, not next."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a dqnode = { v : 'a; mutable next : 'a dqnode option; mutable prev : 'a dqnode option }\ntype 'a deque = { mutable head : 'a dqnode option; mutable tail : 'a dqnode option }\n\nlet create () : 'a deque = { head = None; tail = None }\n\nlet insert_tail (x : 'a) (d : 'a deque) : unit =\n  let n = { v = x; next = None; prev = d.tail } in\n  begin match d.tail with\n  | None -> d.head <- Some n\n  | Some t -> t.next <- Some n\n  end;\n  d.tail <- Some n\n\n(* Test helpers (tail recursive). *)\nlet dq_of_list (l : 'a list) : 'a deque =\n  let d = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> insert_tail x d; go tl end in\n  go l; d\n\nlet dq_contents (d : 'a deque) : 'a list =\n  let rec go (no : 'a dqnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go d.head []\n\nlet dq_valid (d : 'a deque) : bool =\n  begin match d.head, d.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    (match h.prev with None -> true | Some _ -> false) &&\n    let rec walk (n : 'a dqnode) (steps : int) : bool =\n      if steps > 100_000_000 then false else\n      begin match n.next with\n      | None -> n == t\n      | Some m -> (match m.prev with Some p -> p == n | None -> false) && walk m (steps + 1)\n      end in\n    walk h 0\n  | _ -> false\n  end\n",
+      "starter": "let length_back (d : 'a deque) : int =\n  failwith \"length_back: fill me in\"\n",
+      "solution": "let length_back (d : 'a deque) : int =\n  let rec loop (no : 'a dqnode option) (acc : int) : int =\n    begin match no with\n    | None -> acc\n    | Some n -> loop n.prev (acc + 1)\n    end\n  in\n  loop d.tail 0\n",
+      "nonTail": "let length_back (d : 'a deque) : int =\n  let rec loop (no : 'a dqnode option) : int =\n    begin match no with\n    | None -> 0\n    | Some n -> 1 + loop n.prev\n    end\n  in\n  loop d.tail\n",
+      "tests": ";; run_test \"empty deque\" (fun () ->\n  length_back (create ()) = 0)\n;; run_test \"three elements\" (fun () ->\n  length_back (dq_of_list [1; 2; 3]) = 3)\n;; run_test \"uses prev pointers\" (fun () ->\n  let d = dq_of_list [1; 2; 3] in (match d.head with Some h -> h.next <- None | None -> ()); length_back d = 3)\n;; run_test \"does not change the deque\" (fun () ->\n  let d = dq_of_list [7; 8] in ignore (length_back d); dq_valid d && dq_contents d = [7; 8])\n;; run_test \"tail recursive: a very long deque\" (fun () ->\n  length_back (dq_of_list (tr_init stress_n (fun i -> i))) = stress_n)\n"
+    }
+  },
+  {
+    "id": "dq-to-list",
+    "title": "to_list",
+    "group": "Deques",
+    "level": 2,
+    "summary": "Return the elements of a deque as a list, head first, by walking backwards from the tail. Done this way, no reversing is needed.",
+    "signature": "val to_list : 'a deque -> 'a list",
+    "examples": [
+      "to_list (from 1, 2, 3) = [1; 2; 3]"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The deque types are the ones from Homework 4.",
+      "Don't use any List library functions: walk from the tail so the result comes out in order."
+    ],
+    "hint": "Each element you visit from the tail belongs in front of everything you have so far.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a dqnode = { v : 'a; mutable next : 'a dqnode option; mutable prev : 'a dqnode option }\ntype 'a deque = { mutable head : 'a dqnode option; mutable tail : 'a dqnode option }\n\nlet create () : 'a deque = { head = None; tail = None }\n\nlet insert_tail (x : 'a) (d : 'a deque) : unit =\n  let n = { v = x; next = None; prev = d.tail } in\n  begin match d.tail with\n  | None -> d.head <- Some n\n  | Some t -> t.next <- Some n\n  end;\n  d.tail <- Some n\n\n(* Test helpers (tail recursive). *)\nlet dq_of_list (l : 'a list) : 'a deque =\n  let d = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> insert_tail x d; go tl end in\n  go l; d\n\nlet dq_contents (d : 'a deque) : 'a list =\n  let rec go (no : 'a dqnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go d.head []\n\nlet dq_valid (d : 'a deque) : bool =\n  begin match d.head, d.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    (match h.prev with None -> true | Some _ -> false) &&\n    let rec walk (n : 'a dqnode) (steps : int) : bool =\n      if steps > 100_000_000 then false else\n      begin match n.next with\n      | None -> n == t\n      | Some m -> (match m.prev with Some p -> p == n | None -> false) && walk m (steps + 1)\n      end in\n    walk h 0\n  | _ -> false\n  end\n",
+      "starter": "let to_list (d : 'a deque) : 'a list =\n  failwith \"to_list: fill me in\"\n",
+      "solution": "let to_list (d : 'a deque) : 'a list =\n  let rec loop (no : 'a dqnode option) (acc : 'a list) : 'a list =\n    begin match no with\n    | None -> acc\n    | Some n -> loop n.prev (n.v :: acc)\n    end\n  in\n  loop d.tail []\n",
+      "nonTail": "let to_list (d : 'a deque) : 'a list =\n  let rec loop (no : 'a dqnode option) : 'a list =\n    begin match no with\n    | None -> []\n    | Some n -> n.v :: loop n.next\n    end\n  in\n  loop d.head\n",
+      "tests": ";; run_test \"empty deque\" (fun () ->\n  to_list (create ()) = ([] : int list))\n;; run_test \"head comes first\" (fun () ->\n  to_list (dq_of_list [1; 2; 3]) = [1; 2; 3])\n;; run_test \"one element\" (fun () ->\n  to_list (dq_of_list [\"x\"]) = [\"x\"])\n;; run_test \"does not change the deque\" (fun () ->\n  let d = dq_of_list [1; 2] in ignore (to_list d); dq_valid d && dq_contents d = [1; 2])\n;; run_test \"tail recursive: a very long deque\" (fun () ->\n  to_list (dq_of_list (tr_init stress_n (fun i -> i))) = tr_init stress_n (fun i -> i))\n"
+    }
+  },
+  {
+    "id": "dq-count",
+    "title": "count",
+    "group": "Deques",
+    "level": 1,
+    "summary": "Count how many elements of a deque satisfy p.",
+    "signature": "val count : ('a -> bool) -> 'a deque -> int",
+    "examples": [
+      "count (fun x -> x > 1) (from 1, 2, 3) = 2"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The deque types are the ones from Homework 4."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a dqnode = { v : 'a; mutable next : 'a dqnode option; mutable prev : 'a dqnode option }\ntype 'a deque = { mutable head : 'a dqnode option; mutable tail : 'a dqnode option }\n\nlet create () : 'a deque = { head = None; tail = None }\n\nlet insert_tail (x : 'a) (d : 'a deque) : unit =\n  let n = { v = x; next = None; prev = d.tail } in\n  begin match d.tail with\n  | None -> d.head <- Some n\n  | Some t -> t.next <- Some n\n  end;\n  d.tail <- Some n\n\n(* Test helpers (tail recursive). *)\nlet dq_of_list (l : 'a list) : 'a deque =\n  let d = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> insert_tail x d; go tl end in\n  go l; d\n\nlet dq_contents (d : 'a deque) : 'a list =\n  let rec go (no : 'a dqnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go d.head []\n\nlet dq_valid (d : 'a deque) : bool =\n  begin match d.head, d.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    (match h.prev with None -> true | Some _ -> false) &&\n    let rec walk (n : 'a dqnode) (steps : int) : bool =\n      if steps > 100_000_000 then false else\n      begin match n.next with\n      | None -> n == t\n      | Some m -> (match m.prev with Some p -> p == n | None -> false) && walk m (steps + 1)\n      end in\n    walk h 0\n  | _ -> false\n  end\n",
+      "starter": "let count (p : 'a -> bool) (d : 'a deque) : int =\n  failwith \"count: fill me in\"\n",
+      "solution": "let count (p : 'a -> bool) (d : 'a deque) : int =\n  let rec loop (no : 'a dqnode option) (acc : int) : int =\n    begin match no with\n    | None -> acc\n    | Some n -> loop n.next (if p n.v then acc + 1 else acc)\n    end\n  in\n  loop d.head 0\n",
+      "nonTail": "let count (p : 'a -> bool) (d : 'a deque) : int =\n  let rec loop (no : 'a dqnode option) : int =\n    begin match no with\n    | None -> 0\n    | Some n -> (if p n.v then 1 else 0) + loop n.next\n    end\n  in\n  loop d.head\n",
+      "tests": ";; run_test \"empty deque\" (fun () ->\n  count (fun _ -> true) (create ()) = 0)\n;; run_test \"counts matches\" (fun () ->\n  count (fun x -> x > 1) (dq_of_list [1; 2; 3]) = 2)\n;; run_test \"no matches\" (fun () ->\n  count (fun x -> x < 0) (dq_of_list [1; 2]) = 0)\n;; run_test \"strings\" (fun () ->\n  count (fun s -> String.length s = 1) (dq_of_list [\"a\"; \"bc\"; \"d\"]) = 2)\n;; run_test \"tail recursive: a very long deque\" (fun () ->\n  count (fun x -> x mod 2 = 1) (dq_of_list (tr_init stress_n (fun i -> i))) = stress_n / 2)\n"
+    }
+  },
+  {
+    "id": "dq-remove-all",
+    "title": "remove_all",
+    "group": "Deques",
+    "level": 3,
+    "summary": "Remove every node whose value equals x from a deque, in place, fixing next and prev links and the head and tail.",
+    "signature": "val remove_all : 'a -> 'a deque -> unit",
+    "examples": [
+      "after remove_all 2 on 2, 1, 2, 3 the deque is 1, 3"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "The deque types are the ones from Homework 4.",
+      "Don't allocate new nodes.",
+      "Every remaining node needs both links correct."
+    ],
+    "hint": "Save n.next before you unlink n, then continue from the saved node.",
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a dqnode = { v : 'a; mutable next : 'a dqnode option; mutable prev : 'a dqnode option }\ntype 'a deque = { mutable head : 'a dqnode option; mutable tail : 'a dqnode option }\n\nlet create () : 'a deque = { head = None; tail = None }\n\nlet insert_tail (x : 'a) (d : 'a deque) : unit =\n  let n = { v = x; next = None; prev = d.tail } in\n  begin match d.tail with\n  | None -> d.head <- Some n\n  | Some t -> t.next <- Some n\n  end;\n  d.tail <- Some n\n\n(* Test helpers (tail recursive). *)\nlet dq_of_list (l : 'a list) : 'a deque =\n  let d = create () in\n  let rec go (l : 'a list) : unit =\n    begin match l with [] -> () | x :: tl -> insert_tail x d; go tl end in\n  go l; d\n\nlet dq_contents (d : 'a deque) : 'a list =\n  let rec go (no : 'a dqnode option) (acc : 'a list) : 'a list =\n    begin match no with None -> List.rev acc | Some n -> go n.next (n.v :: acc) end in\n  go d.head []\n\nlet dq_valid (d : 'a deque) : bool =\n  begin match d.head, d.tail with\n  | None, None -> true\n  | Some h, Some t ->\n    (match h.prev with None -> true | Some _ -> false) &&\n    let rec walk (n : 'a dqnode) (steps : int) : bool =\n      if steps > 100_000_000 then false else\n      begin match n.next with\n      | None -> n == t\n      | Some m -> (match m.prev with Some p -> p == n | None -> false) && walk m (steps + 1)\n      end in\n    walk h 0\n  | _ -> false\n  end\n",
+      "starter": "let remove_all (x : 'a) (d : 'a deque) : unit =\n  failwith \"remove_all: fill me in\"\n",
+      "solution": "let remove_all (x : 'a) (d : 'a deque) : unit =\n  let rec loop (cur : 'a dqnode option) : unit =\n    begin match cur with\n    | None -> ()\n    | Some n ->\n      let nxt = n.next in\n      if n.v = x then begin\n        (match n.prev with None -> d.head <- n.next | Some p -> p.next <- n.next);\n        (match n.next with None -> d.tail <- n.prev | Some m -> m.prev <- n.prev);\n        n.next <- None;\n        n.prev <- None\n      end;\n      loop nxt\n    end\n  in\n  loop d.head\n",
+      "nonTail": "let remove_all (x : 'a) (d : 'a deque) : unit =\n  let rec loop (cur : 'a dqnode option) : unit =\n    begin match cur with\n    | None -> ()\n    | Some n ->\n      loop n.next;\n      if n.v = x then begin\n        (match n.prev with None -> d.head <- n.next | Some p -> p.next <- n.next);\n        (match n.next with None -> d.tail <- n.prev | Some m -> m.prev <- n.prev);\n        n.next <- None;\n        n.prev <- None\n      end\n    end\n  in\n  loop d.head\n",
+      "tests": ";; run_test \"removes from the middle and both ends\" (fun () ->\n  let d = dq_of_list [2; 1; 2; 3; 2] in remove_all 2 d; dq_contents d = [1; 3] && dq_valid d)\n;; run_test \"removing everything empties the deque\" (fun () ->\n  let d = dq_of_list [5; 5] in remove_all 5 d; d.head = None && d.tail = None)\n;; run_test \"missing value changes nothing\" (fun () ->\n  let d = dq_of_list [1; 2] in remove_all 9 d; dq_contents d = [1; 2] && dq_valid d)\n;; run_test \"keeps the same nodes\" (fun () ->\n  let d = dq_of_list [2; 1; 3] in let n1 = (match d.head with Some h -> (match h.next with Some m -> m | None -> h) | None -> failwith \"empty\") in remove_all 2 d; (match d.head with Some h -> h == n1 | None -> false))\n;; run_test \"tail recursive: a very long deque\" (fun () ->\n  let d = dq_of_list (tr_init stress_n (fun i -> i mod 2)) in remove_all 1 d; dq_valid d && List.length (dq_contents d) = stress_n / 2)\n"
+    }
+  },
+  {
+    "id": "record-all",
+    "title": "record_all",
+    "group": "Mutable state and records",
+    "level": 2,
+    "summary": "Add every number in the list to a stats record (count, total and largest so far), updating its mutable fields. Return how many numbers were recorded.",
+    "signature": "type stats = { mutable count : int; mutable total : int; mutable largest : int option }\nval record_all : stats -> int list -> int",
+    "examples": [
+      "let s = new_stats () in record_all s [4; 9; 2] = 3 && s.total = 15 && s.largest = Some 9"
+    ],
+    "rules": [
+      "Must be tail recursive.",
+      "Update the record as you go; it may already hold earlier numbers."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type stats = { mutable count : int; mutable total : int; mutable largest : int option }\n\nlet new_stats () : stats = { count = 0; total = 0; largest = None }\n",
+      "starter": "let record_all (s : stats) (l : int list) : int =\n  failwith \"record_all: fill me in\"\n",
+      "solution": "let record_all (s : stats) (l : int list) : int =\n  let rec loop (l : int list) (n : int) : int =\n    begin match l with\n    | [] -> n\n    | x :: tl ->\n      s.count <- s.count + 1;\n      s.total <- s.total + x;\n      s.largest <- (match s.largest with Some m when m >= x -> Some m | _ -> Some x);\n      loop tl (n + 1)\n    end\n  in\n  loop l 0\n",
+      "nonTail": "let rec record_all (s : stats) (l : int list) : int =\n  begin match l with\n  | [] -> 0\n  | x :: tl ->\n    s.count <- s.count + 1;\n    s.total <- s.total + x;\n    s.largest <- (match s.largest with Some m when m >= x -> Some m | _ -> Some x);\n    1 + record_all s tl\n  end\n",
+      "tests": ";; run_test \"empty list records nothing\" (fun () ->\n  let s = new_stats () in record_all s [] = 0 && s.count = 0 && s.largest = None)\n;; run_test \"updates every field\" (fun () ->\n  let s = new_stats () in record_all s [4; 9; 2] = 3 && s.count = 3 && s.total = 15 && s.largest = Some 9)\n;; run_test \"adds to earlier stats\" (fun () ->\n  let s = new_stats () in ignore (record_all s [10]); record_all s [1; 2] = 2 && s.count = 3 && s.total = 13 && s.largest = Some 10)\n;; run_test \"negative numbers\" (fun () ->\n  let s = new_stats () in ignore (record_all s [-5; -2]); s.largest = Some (-2))\n;; run_test \"tail recursive: a very long list\" (fun () ->\n  let s = new_stats () in record_all s (tr_init stress_n (fun _ -> 1)) = stress_n && s.total = stress_n)\n"
+    }
+  },
+  {
+    "id": "drain-stack",
+    "title": "drain",
+    "group": "Mutable state and records",
+    "level": 2,
+    "summary": "Pop every item off a mutable stack, top first, calling f on each one. Leave the stack empty and return how many items were popped.",
+    "signature": "type 'a stack = { mutable items : 'a list }\nval drain : 'a stack -> ('a -> unit) -> int",
+    "examples": [
+      "draining a stack with items [3; 2; 1] calls f 3, then f 2, then f 1, and returns 3"
+    ],
+    "rules": [
+      "Must be tail recursive."
+    ],
+    "practice": {
+      "lang": "ocaml",
+      "mode": "tests",
+      "setup": "type 'a stack = { mutable items : 'a list }   (* the top is the head of items *)\n\nlet stack_of_list (l : 'a list) : 'a stack = { items = l }\n",
+      "starter": "let drain (s : 'a stack) (f : 'a -> unit) : int =\n  failwith \"drain: fill me in\"\n",
+      "solution": "let drain (s : 'a stack) (f : 'a -> unit) : int =\n  let rec loop (n : int) : int =\n    begin match s.items with\n    | [] -> n\n    | x :: rest ->\n      s.items <- rest;\n      f x;\n      loop (n + 1)\n    end\n  in\n  loop 0\n",
+      "nonTail": "let rec drain (s : 'a stack) (f : 'a -> unit) : int =\n  begin match s.items with\n  | [] -> 0\n  | x :: rest ->\n    s.items <- rest;\n    f x;\n    1 + drain s f\n  end\n",
+      "tests": ";; run_test \"empty stack\" (fun () ->\n  drain (stack_of_list []) (fun _ -> ()) = 0)\n;; run_test \"pops top first\" (fun () ->\n  let seen = ref [] in let n = drain (stack_of_list [3; 2; 1]) (fun x -> seen := x :: !seen) in n = 3 && !seen = [1; 2; 3])\n;; run_test \"leaves the stack empty\" (fun () ->\n  let s = stack_of_list [\"a\"; \"b\"] in ignore (drain s (fun _ -> ())); s.items = [])\n;; run_test \"f sees the stack already popped\" (fun () ->\n  let s = stack_of_list [1; 2] in let sizes = ref [] in ignore (drain s (fun _ -> sizes := List.length s.items :: !sizes)); !sizes = [0; 1])\n;; run_test \"tail recursive: a very tall stack\" (fun () ->\n  let total = ref 0 in drain (stack_of_list (tr_init stress_n (fun i -> i))) (fun x -> total := !total + 1) = stress_n && !total = stress_n)\n"
+    }
+  }
+]
