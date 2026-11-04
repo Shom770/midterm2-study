@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""Builds js/data.js from data/*.json and the problems/ folder.
+
+The app loads js/data.js with a plain <script> tag so it works from file://.
+Run from anywhere:  python3 scripts/build_data.py
+"""
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "data"
+EXAM_ORDER = ["25fa", "26sp", "25sp", "24fa", "mock"]
+
+# Problems outside Midterm 2's coverage (trees, DNA/helices, sets, higher-order).
+MIDTERM1 = {6, 9, 15, 18, 20, 23, 24, 25, 26, 28, 30, 36, 37, 38, 39, 42, 44, 45}
+
+errors = []
+
+
+def load(path):
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError as e:
+        sys.exit(f"{path.relative_to(ROOT)}: invalid JSON: {e}")
+
+
+def item_sort_key(item_id):
+    return [int(p) for p in item_id.split(".")]
+
+
+def expand_ref(ref, exams):
+    """'25fa 1.2-1.5' -> ('25fa', ['1.2', ..., '1.5']); '26sp 3' -> whole section."""
+    m = re.fullmatch(r"(\w+) (\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?))?", ref)
+    if not m:
+        errors.append(f"topics: can't parse exam ref {ref!r}")
+        return None
+    exam_id, lo, hi = m.groups()
+    exam = exams.get(exam_id)
+    if not exam:
+        errors.append(f"topics: ref {ref!r} names an unknown exam")
+        return None
+    ids = [it["id"] for sec in exam["sections"] for it in sec["items"]]
+    if hi is None and "." not in lo:
+        picked = [i for i in ids if i == lo or i.startswith(lo + ".")]
+    else:
+        hi = hi or lo
+        picked = [i for i in ids if item_sort_key(lo) <= item_sort_key(i) <= item_sort_key(hi)]
+    if not picked:
+        errors.append(f"topics: ref {ref!r} matches no items in {exam_id}")
+    return {"exam": exam_id, "label": ref, "items": picked}
+
+
+def check_exam(exam):
+    total = sum(s["points"] for s in exam["sections"])
+    if total != exam["points"]:
+        errors.append(f"exam {exam['id']}: sections add to {total}, exam says {exam['points']}")
+    for s in exam["sections"]:
+        got = sum(it["points"] for it in s["items"])
+        if got != s["points"]:
+            errors.append(f"exam {exam['id']} section {s['id']}: items add to {got}, section says {s['points']}")
+        for it in s["items"]:
+            if it.get("keyStatus") not in ("from-guide", "derived", "none"):
+                errors.append(f"exam {exam['id']} item {it['id']}: bad keyStatus {it.get('keyStatus')!r}")
+            if it.get("keyStatus") != "none" and not it.get("key"):
+                errors.append(f"exam {exam['id']} item {it['id']}: keyStatus {it['keyStatus']} but no key")
+
+
+def main():
+    cards = load(DATA / "cards.json")
+    topics = load(DATA / "topics.json")
+    plan = load(DATA / "plan.json")
+
+    exams = {}
+    for path in sorted((DATA / "exams").glob("*.json")):
+        exam = load(path)
+        check_exam(exam)
+        exams[exam["id"]] = exam
+    ordered = [exams[i] for i in EXAM_ORDER if i in exams] + [e for i, e in exams.items() if i not in EXAM_ORDER]
+
+    seen = set()
+    for c in cards:
+        if c["id"] in seen:
+            errors.append(f"cards: duplicate id {c['id']}")
+        seen.add(c["id"])
+    card_topics = {c["topic"] for c in cards}
+    for t in topics:
+        for ct in t["cardTopics"]:
+            if ct not in card_topics:
+                errors.append(f"topics: {t['id']} links card topic {ct!r}, which has no cards")
+        t["examRefs"] = [r for r in (expand_ref(ref, exams) for ref in t.pop("exams")) if r]
+    unlinked = card_topics - {ct for t in topics for ct in t["cardTopics"]}
+    if unlinked:
+        errors.append(f"cards: topics not in the topic map: {sorted(unlinked)}")
+
+    bank = {p["id"]: p for p in load(ROOT / "problems.json")["problems"]}
+    problem_topics = {}
+    for t in topics:
+        for pid in t["problems"]:
+            problem_topics.setdefault(pid, []).append(t["id"])
+    problems = []
+    for folder in sorted((ROOT / "problems").iterdir()):
+        if not folder.is_dir():
+            continue
+        pid = int(re.match(r"q(\d+)_", folder.name).group(1))
+        meta = bank.get(pid, {})
+        md = folder / "PROBLEM.md"
+        problems.append({
+            "id": pid,
+            "title": meta.get("title", folder.name),
+            "folder": folder.name,
+            "filename": meta.get("filename", ""),
+            "topics": problem_topics.get(pid, []),
+            "midterm1": pid in MIDTERM1,
+            "text": md.read_text() if md.exists() else "",
+        })
+    problems.sort(key=lambda p: p["id"])
+    for pid, tids in problem_topics.items():
+        if pid in MIDTERM1:
+            errors.append(f"topics: problem {pid} is mapped to {tids} but marked Midterm 1")
+
+    if errors:
+        print("\n".join(errors))
+        sys.exit(1)
+
+    data = {"cards": cards, "topics": topics, "plan": plan, "exams": ordered, "problems": problems}
+    out = ROOT / "js" / "data.js"
+    out.write_text(
+        "// Generated by scripts/build_data.py from data/ and problems/. Do not edit.\n"
+        f"window.M2_DATA = {json.dumps(data, ensure_ascii=False, indent=1)};\n"
+    )
+    n_items = sum(len(s["items"]) for e in ordered for s in e["sections"])
+    print(f"wrote {out.relative_to(ROOT)}: {len(cards)} cards, {len(ordered)} exams ({n_items} items), "
+          f"{len(topics)} topics, {len(problems)} problems")
+
+
+if __name__ == "__main__":
+    main()

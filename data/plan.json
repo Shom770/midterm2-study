@@ -1,0 +1,63 @@
+{
+  "days": [
+    {"date": "2026-10-31", "label": "Sat Oct 31", "tasks": [
+      {"id": "d1-shapes", "text": "How the exam asks questions", "hours": 0.25},
+      {"id": "d1-ch11-14", "text": "Ch 11–14: options, unit, records, mutability", "hours": 1.25},
+      {"id": "d1-ch15", "text": "Ch 15 ASM: drills on paper", "hours": 1.0}
+    ]},
+    {"date": "2026-11-01", "label": "Sun Nov 1", "tasks": [
+      {"id": "d2-ch16", "text": "Ch 16 queues, deques, tail recursion + practice", "hours": 2.5},
+      {"id": "d2-25sp1", "text": "Spring 2025 Problem 1 blind, then grade", "hours": 0.75},
+      {"id": "d2-hw4", "text": "Re-read your HW4 linkedQueue.ml and deque.ml", "hours": 0.5}
+    ]},
+    {"date": "2026-11-02", "label": "Mon Nov 2", "tasks": [
+      {"id": "d3-ch17", "text": "Ch 17 closures", "hours": 0.67},
+      {"id": "d3-ch18", "text": "Ch 18 GUI, including past-exam problems", "hours": 1.5},
+      {"id": "d3-hw5", "text": "Re-read HW5 widget.ml", "hours": 0.5},
+      {"id": "d3-gui-blind", "text": "Fall 2024 Problem 4 and Spring 2026 Problem 4 blind", "hours": 0.75}
+    ]},
+    {"date": "2026-11-03", "label": "Tue Nov 3", "tasks": [
+      {"id": "d4-ch19-20", "text": "Ch 19–20 Java basics", "hours": 1.0},
+      {"id": "d4-ch21", "text": "Ch 21 arrays, including past-exam methods", "hours": 1.25},
+      {"id": "d4-ch32-33", "text": "Ch 32–33 encapsulation", "hours": 1.0},
+      {"id": "d4-java-asm", "text": "Java ASM (bonus)", "hours": 0.25}
+    ]},
+    {"date": "2026-11-04", "label": "Wed Nov 4", "tasks": [
+      {"id": "d5-25fa", "text": "Fall 2025 exam blind, 60-minute timer", "hours": 1.0},
+      {"id": "d5-grade", "text": "Grade it with the solutions", "hours": 0.5},
+      {"id": "d5-review", "text": "Review session 7–9pm, PCPE Auditorium (recorded)", "hours": 2.0}
+    ]},
+    {"date": "2026-11-05", "label": "Thu Nov 5", "tasks": [
+      {"id": "d6-mock", "text": "Mock exam, 60-minute timer", "hours": 1.0},
+      {"id": "d6-solutions", "text": "Go over the solutions", "hours": 0.5},
+      {"id": "d6-redo", "text": "Re-do missed items", "hours": 0.5},
+      {"id": "d6-sheet", "text": "Cheat sheet", "hours": 0.25}
+    ]},
+    {"date": "2026-11-06", "label": "Fri Nov 6", "tasks": [
+      {"id": "d7-skim", "text": "Skim the cheat sheet at breakfast", "hours": 0.25},
+      {"id": "d7-exam", "text": "Exam: 10:15am (001, last names A–L, STIT 261) or noon (002, M–Z, NBS Auditorium)", "hours": 1.0}
+    ]}
+  ],
+  "minimum": [
+    "Ch 15 ASM drills",
+    "Ch 16 queues/deques: types, invariants, enq/deq, the tail-call rule, P8/P9/P11, D0/D1/D2",
+    "Ch 18 GUI: appendix block, notifier facts, G5/G6/G7",
+    "Ch 21 arrays: aliasing, 2D rules, J2/J3/J4",
+    "Ch 32 encapsulation",
+    "Fall 2025 blind + grade",
+    "Mock exam",
+    "Cheat sheet"
+  ],
+  "examDay": [
+    "Skim all problems and note the points",
+    "Start with the problem you know best",
+    "On every queue function: check head, tail, and both None when empty",
+    "On every Java snippet: compile error vs runtime exception vs output; check static, null, bounds, == vs equals",
+    "Keep types generic ('a queue)",
+    "Leave two minutes to reread the \"returns ()\" and \"may use only ...\" lines"
+  ],
+  "exams": [
+    {"section": "001", "label": "Section 001 (last names A–L), STIT 261", "start": "2026-11-06T10:15:00-05:00"},
+    {"section": "002", "label": "Section 002 (last names M–Z), NBS Auditorium", "start": "2026-11-06T12:00:00-05:00"}
+  ]
+}
